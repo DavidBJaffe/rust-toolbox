@@ -104,7 +104,17 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
             let mut last: String = String::new();
             let mut first = true;
             for line in fin.lines() {
-                let s = line.unwrap();
+                let s = line;
+                if s.is_err() {
+                    eprintln!(
+                        "\nError in read_fasta_into_vec_dna_string_plus_headers reading \
+                        file\n{}\nerr = {}",
+                        f.display(),
+                        s.err().unwrap(),
+                    );
+                    std::process::exit(1);
+                }
+                let s = s.unwrap();
                 if first {
                     if !s.starts_with('>') {
                         panic!("fasta format failure");
