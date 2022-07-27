@@ -19,6 +19,7 @@
 // 1. Download files from Ensembl:
 //    build_vdj_ref DOWNLOAD
 //    You don't need to do this unless you're updating to a new Ensembl release.
+//    This puts files in a directory ensembl.
 //
 // 2. Create reference files:
 //    build_vdj_ref HUMAN
@@ -106,7 +107,13 @@ use vector_utils::{bin_member, bin_position1_2, erase_if, next_diff12_8, unique_
 
 use io_utils::{fwrite, fwriteln, open_for_read, open_for_write_new};
 
-fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) -> String {
+fn header_from_gene(
+    gene: &str,
+    is_5utr: bool,
+    is_3utr: bool,
+    record: &mut usize,
+    source: &str,
+) -> String {
     let mut gene = gene.to_string();
     if gene.ends_with(' ') {
         gene = gene.rev_before(" ").to_string();
@@ -132,8 +139,10 @@ fn header_from_gene(gene: &str, is_utr: bool, record: &mut usize, source: &str) 
     );
     *record += 1;
     let region_type: String;
-    if is_utr {
+    if is_5utr {
         region_type = "5'UTR".to_string();
+    } else if is_3utr {
+        region_type = "3'UTR".to_string();
     } else if gene == "IGHD"
         || gene == "IGHE"
         || gene == "IGHM"
@@ -200,7 +209,7 @@ fn add_gene<R: Write>(
     }
     let chrid = to_chr[chr];
     let seq = refs[chrid].slice(start - 1, stop);
-    let header = header_from_gene(gene, is_utr, record, source);
+    let header = header_from_gene(gene, is_utr, false, record, source);
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
@@ -234,7 +243,7 @@ fn add_gene2<R: Write>(
     if !fw {
         seq = seq.rc();
     }
-    let header = header_from_gene(gene, false, record, source);
+    let header = header_from_gene(gene, false, false, record, source);
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
@@ -281,9 +290,6 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
             continue;
         }
         if cat == "start_codon" || cat == "stop_codon" {
-            continue;
-        }
-        if cat == "three_prime_utr" {
             continue;
         }
 
@@ -410,10 +416,21 @@ fn main() {
         }
     };
 
-    // Define root output directory.
+    // Get ensembl location.
 
-    let root = "vdj_ann_ref/vdj_refs";
-    let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
+    let mut ensembl_loc = String::new();
+    for (key, value) in env::vars() {
+        if key == "VDJ_ANN_REF_ENSEMBL" {
+            ensembl_loc = value.clone();
+        }
+    }
+    if ensembl_loc.len() == 0 {
+        eprintln!(
+            "\nTo use build_vdj_ref, you first need to set the environment variable \
+            VDJ_ANN_REF_ENSEMBL\nto the path of your ensembl directory.\n"
+        );
+        std::process::exit(1);
+    }
 
     // Define release.  If this is ever changed, the effect on the fasta output
     // files should be very carefully examined.  Specify sequence source.
@@ -437,7 +454,7 @@ fn main() {
 
     // Define local directory.
 
-    let internal = "/mnt/opt/meowmix_git/ensembl";
+    let internal = &ensembl_loc;
 
     // Set up for exceptions.  Coordinates are the usual 1-based coordinates used in
     // genomics.  If the bool field ("fw") is false, the given coordinates are used
@@ -971,11 +988,10 @@ fn main() {
     // gigantic runs of ends), so we don't uncompress fasta files.
 
     if download {
-        fn fetch(species: &str, ftype: &str, release: i32) {
+        fn fetch(species: &str, ftype: &str, release: i32, internal: &str) {
             println!("fetching {}.{}", species, ftype);
             let path = ensembl_path(species, ftype, release);
             let external = "ftp://ftp.ensembl.org/pub";
-            let internal = "/mnt/opt/meowmix_git/ensembl";
             let dir = format!("{}/{}", internal, path.rev_before("/"));
             fs::create_dir_all(&dir).unwrap();
             let full_path = format!("{}/{}", internal, path);
@@ -990,6 +1006,8 @@ fn main() {
                     .status()
                     .expect("gunzip failed");
             }
+            // Code specific to 10x commented out.
+            /*
             Command::new("git")
                 .current_dir(&internal)
                 .arg("add")
@@ -1002,15 +1020,21 @@ fn main() {
                 .arg(path)
                 .status()
                 .expect("git commit failed");
+            */
         }
         // ◼ Add balbc if we're going ot use it.
         for species in ["human", "mouse"].iter() {
             for ftype in ["gff3", "gtf", "fasta"].iter() {
-                fetch(species, ftype, release);
+                fetch(species, ftype, release, internal);
             }
         }
         std::process::exit(0);
     }
+
+    // Define root output directory.
+
+    let root = "vdj_ann_ref/vdj_refs";
+    let mut out = open_for_write_new![&format!("{}/{}/fasta/regions.fa", root, species)];
 
     // Define input filenames.
 
@@ -1376,7 +1400,30 @@ fn main() {
             }
         }
         if !seq.is_empty() {
-            let header = header_from_gene(gene, true, &mut record, trid);
+            let header = header_from_gene(gene, true, false, &mut record, trid);
+            print_oriented_fasta(&mut out, &header, &seq.slice(0, seq.len()), fw, none);
+        }
+
+        // Build the 3' UTR, if there is one.  We allow for the possibility
+        // that there is an intron in the UTR.
+
+        let mut seq = DnaString::new();
+        let trid = &exons[i].7;
+        for k in i..j {
+            if exons[k].2 != chr {
+                continue;
+            }
+            let (start, stop) = (exons[k].3, exons[k].4);
+            let cat = &exons[k].5;
+            if cat == "three_prime_utr" {
+                let seqx = refs[chrid].slice(start as usize, stop as usize);
+                for i in 0..seqx.len() {
+                    seq.push(seqx.get(i));
+                }
+            }
+        }
+        if !seq.is_empty() {
+            let header = header_from_gene(gene, false, true, &mut record, trid);
             print_oriented_fasta(&mut out, &header, &seq.slice(0, seq.len()), fw, none);
         }
 
@@ -1408,7 +1455,7 @@ fn main() {
                 }
             }
             if !seq.is_empty() {
-                let header = header_from_gene(gene, false, &mut record, trid);
+                let header = header_from_gene(gene, false, false, &mut record, trid);
                 let mut seqx = seq.clone();
                 if !fw {
                     seqx = seqx.rc();
@@ -1482,7 +1529,7 @@ fn main() {
             if p >= 0 {
                 m = left_trims[p as usize].1;
             }
-            let header = header_from_gene(gene, false, &mut record, trid);
+            let header = header_from_gene(gene, false, false, &mut record, trid);
             let seqx = seq.clone();
             print_oriented_fasta(&mut out, &header, &seqx.slice(m, n as usize), fw, none);
         }
@@ -1510,6 +1557,9 @@ fn main() {
                 if exons[k].2 != chr {
                     continue;
                 }
+                if exons[k].5 == "three_prime_utr" {
+                    continue;
+                }
                 let (start, stop) = (exons[k].3, exons[k].4);
                 let seqx = refs[chrid].slice(start as usize, stop as usize);
                 for i in 0..seqx.len() {
@@ -1521,7 +1571,7 @@ fn main() {
             if p >= 0 {
                 m = left_trims[p as usize].1;
             }
-            let header = header_from_gene(&gene, false, &mut record, trid);
+            let header = header_from_gene(&gene, false, false, &mut record, trid);
             if fw {
                 print_oriented_fasta(&mut out, &header, &seq.slice(m, seq.len()), fw, none);
             } else {
@@ -1588,13 +1638,13 @@ fn main() {
         if !fw {
             seq = seq.rc();
         }
-        let header = header_from_gene(gene, false, &mut record, source);
+        let header = header_from_gene(gene, false, false, &mut record, source);
         print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
     }
     for i in 0..added_genes_seq.len() {
         let gene = &added_genes_seq[i].0;
         let seq = DnaString::from_dna_string(added_genes_seq[i].1);
-        let header = header_from_gene(gene, false, &mut record, &source);
+        let header = header_from_gene(gene, false, false, &mut record, &source);
         print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
     }
 }
