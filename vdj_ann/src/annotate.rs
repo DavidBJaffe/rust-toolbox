@@ -2076,6 +2076,9 @@ pub fn annotate_seq_core(
             if !refdata.is_c(t1) || !refdata.is_c(t2) {
                 continue;
             }
+            if refdata.rheaders[t1].contains("3'") || refdata.rheaders[t2].contains("3'") {
+                continue;
+            }
             let (l1, l2) = (annx[i1].0, annx[i2].0);
             let (p1, p2) = (annx[i1].3, annx[i2].3);
             if p1 > 0 {
@@ -2192,7 +2195,7 @@ pub fn annotate_seq_core(
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") {
             let name = rheaders[t].after("|").between("|", "|");
-            if rheaders[t].contains("UTR") {
+            if rheaders[t].contains("5'UTR") {
                 u.push(name.to_string());
             }
             if rheaders[t].contains("V-REGION") {
@@ -2207,7 +2210,7 @@ pub fn annotate_seq_core(
                 let t = annx[j].2 as usize;
                 if !rheaders[t].contains("segment") {
                     let name = rheaders[t].after("|").between("|", "|");
-                    if rheaders[t].contains("UTR") && u[i] == name {
+                    if rheaders[t].contains("5'UTR") && u[i] == name {
                         to_delete[j] = true;
                     }
                 }
@@ -2344,7 +2347,9 @@ pub fn annotate_seq_core(
                 if !rheaders[t1 as usize].contains("J-REGION") {
                     continue;
                 }
-            } else if !rheaders[t1 as usize].contains("C-REGION") {
+            } else if !rheaders[t1 as usize].contains("C-REGION")
+                || rheaders[t1 as usize].contains("3'UTR")
+            {
                 continue;
             }
             for i2 in 0..annx.len() {
@@ -2353,7 +2358,9 @@ pub fn annotate_seq_core(
                     if !rheaders[t2 as usize].contains("J-REGION") {
                         continue;
                     }
-                } else if !rheaders[t2 as usize].contains("C-REGION") {
+                } else if !rheaders[t2 as usize].contains("C-REGION")
+                    || rheaders[t2 as usize].contains("3'UTR")
+                {
                     continue;
                 }
                 let (l1, l2) = (annx[i1].0, annx[i2].0);
@@ -2388,12 +2395,14 @@ pub fn annotate_seq_core(
     let mut to_delete = vec![false; annx.len()];
     for i1 in 0..annx.len() {
         let t1 = annx[i1].2;
-        if !rheaders[t1 as usize].contains("C-REGION") {
+        if !rheaders[t1 as usize].contains("C-REGION") || rheaders[t1 as usize].contains("3'UTR") {
             continue;
         }
         for i2 in 0..annx.len() {
             let t2 = annx[i2].2;
-            if !rheaders[t2 as usize].contains("C-REGION") {
+            if !rheaders[t2 as usize].contains("C-REGION")
+                || rheaders[t2 as usize].contains("3'UTR")
+            {
                 continue;
             }
             let (l1, l2) = (annx[i1].0 as usize, annx[i2].0 as usize);
@@ -2410,7 +2419,7 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
-    // Again remove UTR annotations that have no matching V annotation.
+    // Again remove 5'UTR annotations that have no matching V annotation.
     // ◼ DANGER with nonstandard references.
     // ◼ Note repetition.
 
@@ -2420,7 +2429,7 @@ pub fn annotate_seq_core(
         let t = annx[i].2 as usize;
         if !rheaders[t].contains("segment") {
             let name = rheaders[t].after("|").between("|", "|");
-            if rheaders[t].contains("UTR") {
+            if rheaders[t].contains("5'UTR") {
                 u.push(name.to_string());
             }
             if rheaders[t].contains("V-REGION") {
@@ -2435,7 +2444,7 @@ pub fn annotate_seq_core(
                 let t = annx[j].2 as usize;
                 if !rheaders[t].contains("segment") {
                     let name = rheaders[t].after("|").between("|", "|");
-                    if rheaders[t].contains("UTR") && u[i] == name {
+                    if rheaders[t].contains("5'UTR") && u[i] == name {
                         to_delete[j] = true;
                     }
                 }
