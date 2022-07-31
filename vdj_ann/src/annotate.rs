@@ -1072,6 +1072,9 @@ pub fn annotate_seq_core(
                         }
                     }
                     for k in i2..j2 {
+                        if refdata.rheaders_orig[ts[k].0].contains("3'UTR") {
+                            continue;
+                        }
                         to_delete[ts[k].1] = true;
                     }
                 }
