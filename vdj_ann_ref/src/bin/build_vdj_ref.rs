@@ -1534,7 +1534,7 @@ fn main() {
             print_oriented_fasta(&mut out, &header, &seqx.slice(m, n as usize), fw, none);
         }
 
-        // Build C segments.
+        // Build C segments.  Extend by three bases to include the stop codon.
 
         if gene.starts_with("TRAC")
             || gene.starts_with("TRBC")
@@ -1560,7 +1560,7 @@ fn main() {
                 if exons[k].5 == "three_prime_utr" {
                     continue;
                 }
-                let (start, stop) = (exons[k].3, exons[k].4);
+                let (start, stop) = (exons[k].3, exons[k].4 + 3);
                 let seqx = refs[chrid].slice(start as usize, stop as usize);
                 for i in 0..seqx.len() {
                     seq.push(seqx.get(i));
