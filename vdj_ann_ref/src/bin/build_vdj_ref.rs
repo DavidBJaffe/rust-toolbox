@@ -1534,7 +1534,7 @@ fn main() {
             print_oriented_fasta(&mut out, &header, &seqx.slice(m, n as usize), fw, none);
         }
 
-        // Build C segments.  Extend by three bases to include the stop codon.
+        // Build C segments.  Extend by three bases if that adds a TAG or TGA stop codon.
 
         if gene.starts_with("TRAC")
             || gene.starts_with("TRBC")
@@ -1553,6 +1553,7 @@ fn main() {
                 gene = format!("TRG{}", gene.after("TRGC"));
             }
             let mut seq = DnaString::new();
+            let mut exons_keep = Vec::<usize>::new();
             for k in i..j {
                 if exons[k].2 != chr {
                     continue;
@@ -1560,7 +1561,43 @@ fn main() {
                 if exons[k].5 == "three_prime_utr" {
                     continue;
                 }
-                let (start, stop) = (exons[k].3, exons[k].4 + 3);
+                exons_keep.push(k);
+            }
+            for m in 0..exons_keep.len() {
+                let k = exons_keep[m];
+                let (mut start, mut stop) = (exons[k].3, exons[k].4);
+                if fw && m == exons_keep.len() - 1 {
+                    if refs[chrid]
+                        .slice(stop as usize, (stop + 3) as usize)
+                        .ascii()
+                        == b"TAG"
+                    {
+                        stop += 3;
+                    }
+                    if refs[chrid]
+                        .slice(stop as usize, (stop + 3) as usize)
+                        .ascii()
+                        == b"TGA"
+                    {
+                        stop += 3;
+                    }
+                }
+                if !fw && m == 0 {
+                    if refs[chrid]
+                        .slice((start - 3) as usize, start as usize)
+                        .ascii()
+                        == b"CTA"
+                    {
+                        start -= 3;
+                    }
+                    if refs[chrid]
+                        .slice((start - 3) as usize, start as usize)
+                        .ascii()
+                        == b"TCA"
+                    {
+                        start -= 3;
+                    }
+                }
                 let seqx = refs[chrid].slice(start as usize, stop as usize);
                 for i in 0..seqx.len() {
                     seq.push(seqx.get(i));
