@@ -4,16 +4,32 @@
 // { { chr-name, start, stop, fw?, gene-name, exon ) }.
 
 use io_utils::open_for_read;
-use std::{assert, format, i32, io::BufRead, str};
+use std::{assert, env, format, i32, io::BufRead, str};
 use string_utils::TextUtils;
 use vector_utils::unique_sort;
 
 pub fn fetch_exons(species: &str, exons: &mut Vec<(String, i32, i32, bool, String, i32)>) {
     assert!(species == "human" || species == "mouse");
 
+    // Get ensembl location.
+
+    let mut ensembl_loc = String::new();
+    for (key, value) in env::vars() {
+        if key == "VDJ_ANN_REF_ENSEMBL" {
+            ensembl_loc = value.clone();
+        }
+    }
+    if ensembl_loc.len() == 0 {
+        eprintln!(
+            "\nTo use fetch_exons, you first need to set the environment variable \
+            VDJ_ANN_REF_ENSEMBL\nto the path of your ensembl directory.\n"
+        );
+        std::process::exit(1);
+    }
+
     // Define gtf file location.  See notes in bin/build_vdj_ref.fs.
 
-    let root = "/mnt/opt/meowmix_git/ensembl/release-94/gtf";
+    let root = format!("{ensembl_loc}/release-94/gtf");
     let gtf = if species == "human" {
         format!(
             "{}/homo_sapiens/Homo_sapiens.GRCh38.94.chr_patch_hapl_scaff.gtf",

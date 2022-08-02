@@ -20,8 +20,8 @@
 //
 // USAGE (ASSUMING YOU ARE RUNNING FROM TOP LEVEL OF REPO):
 //
-// build_supp_ref HUMAN > vdj_ann/vdj_refs/human/supp_regions.fa
-// build_supp_ref MOUSE > vdj_ann/vdj_refs/mouse/supp_regions.fa
+// build_supp_ref HUMAN > vdj_ann_ref/vdj_refs/human/fasta/supp_regions.fa
+// build_supp_ref MOUSE > vdj_ann_ref/vdj_refs/mouse/fasta/supp_regions.fa
 //
 // And these also need to go into the references on /mnt/opt and possibly /mnt/test.
 
@@ -63,12 +63,28 @@ fn main() {
         panic!("Unknown species.");
     }
 
+    // Get ensembl location.
+
+    let mut ensembl_loc = String::new();
+    for (key, value) in env::vars() {
+        if key == "VDJ_ANN_REF_ENSEMBL" {
+            ensembl_loc = value.clone();
+        }
+    }
+    if ensembl_loc.len() == 0 {
+        eprintln!(
+            "\nTo use build_supp_ref, you first need to set the environment variable \
+            VDJ_ANN_REF_ENSEMBL\nto the path of your ensembl directory.\n"
+        );
+        std::process::exit(1);
+    }
+
     // Load the exons.
 
     let mut exons = Vec::<(String, i32, i32, bool, String, i32)>::new();
     fetch_exons(species, &mut exons);
 
-    // Hardcoded and inappropriate fasta location.
+    // Fasta location.
     // source = ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/
     //          dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
     // DO NOT USE
@@ -78,14 +94,18 @@ fn main() {
     // Notice weirdness in the process: somehow much faster to first download
     // to laptop.
     //
-    // Addendum: above outdated, see build_vdj_ref.rs.
+    // Addendum: above outdated, see build_vdj_ref.rs.  (Not sure what this means.)
 
     let fasta = if species == "human" {
-        "/mnt/assembly/peeps/jaffe/\
-                 Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+        format!(
+            "{ensembl_loc}/release-94/fasta/homo_sapiens/dna/\
+                Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+        )
     } else {
-        "/mnt/opt/meowmix_git/ensembl/release-94/fasta/mus_musculus/dna/\
+        format!(
+            "{ensembl_loc}/release-94/fasta/mus_musculus/dna/\
                  Mus_musculus.GRCm38.dna.toplevel.fa.gz"
+        )
     };
 
     // Load fasta.
