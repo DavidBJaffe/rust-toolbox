@@ -232,8 +232,6 @@ pub fn make_vdj_ref_data_core(
 
     // Extend the reference.
 
-    println!("1 rheaders has length {}", rheaders.len());
-    println!("1 rheaders_orig has length {}", refdata.rheaders_orig.len());
     if !extended_ref_fasta.is_empty() {
         let mut refs2 = Vec::<DnaString>::new();
         let mut rheaders2 = Vec::<String>::new();
@@ -243,7 +241,7 @@ pub fn make_vdj_ref_data_core(
             &mut rheaders2,
         );
         refs.append(&mut refs2);
-        rheaders.append(&mut rheaders2);
+        rheaders.append(&mut rheaders2.clone());
         refdata.rheaders_orig.append(&mut rheaders2);
         // ◼ Note not appending to refdata.name.  This may be a bug.
     }
@@ -270,6 +268,4 @@ pub fn make_vdj_ref_data_core(
             }
         }
     }
-    println!("2 rheaders has length {}", rheaders.len());
-    println!("2 rheaders_orig has length {}", refdata.rheaders_orig.len());
 }
