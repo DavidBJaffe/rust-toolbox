@@ -242,6 +242,7 @@ pub fn make_vdj_ref_data_core(
         );
         refs.append(&mut refs2);
         rheaders.append(&mut rheaders2);
+        refdata.rheaders_orig.append(&mut rheaders2);
         // ◼ Note not appending to refdata.name.  This may be a bug.
     }
 
