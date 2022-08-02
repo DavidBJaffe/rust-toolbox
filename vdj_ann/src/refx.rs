@@ -268,4 +268,6 @@ pub fn make_vdj_ref_data_core(
             }
         }
     }
+    println!("rheaders has length {}", refdata.rheaders.len());
+    println!("rheaders_orig has length {}", refdata.rheaders_orig.len());
 }
