@@ -214,7 +214,12 @@ pub fn vis_align(s1: &[u8], s2: &[u8], ops: &[AlignmentOperation], width: usize)
                 );
             }
             t1.push(s1[pos1]);
-            t2.push(s2[pos2]);
+            // prevent crash, presumably working around garbled input
+            if pos2 < s2.len() {
+                t2.push(s2[pos2]);
+            } else {
+                t2.push(b'?');
+            }
             pos1 += 1;
             pos2 += 1;
             if ops[i] == Match {
@@ -224,7 +229,12 @@ pub fn vis_align(s1: &[u8], s2: &[u8], ops: &[AlignmentOperation], width: usize)
             }
         } else if ops[i] == Del {
             t1.push(b' ');
-            t2.push(s2[pos2]);
+            // prevent crash, presumably working around garbled input
+            if pos2 < s2.len() {
+                t2.push(s2[pos2]);
+            } else {
+                t2.push(b'?');
+            }
             pos2 += 1;
             d.push(b'|');
         } else if ops[i] == Ins {
