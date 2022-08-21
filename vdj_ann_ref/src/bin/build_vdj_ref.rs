@@ -585,6 +585,13 @@ fn main() {
         deleted_genes.push("IGKV1D-39");
         deleted_genes.push("IGKV2D-28");
 
+        // Delete more human genes.  We observe that these are very rarely assigned, and when
+        // assigned, apparently incorrect.
+
+        deleted_genes.push("IGLJ4");
+        deleted_genes.push("IGLJ5");
+        deleted_genes.push("IGJL6");
+
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
         // Begin human changes for cell ranger 5.0.
         // (see also mouse changes, below)
