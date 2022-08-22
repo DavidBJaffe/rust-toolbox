@@ -975,6 +975,7 @@ pub fn annotate_seq_core(
             }
         }
     }
+    erase_if(&mut annx, &to_delete);
 
     // Remove inferior matches of the edge.  Two alignments are compared if the
     // length of their overlap on the contig is at least 85% of one of the alignment
