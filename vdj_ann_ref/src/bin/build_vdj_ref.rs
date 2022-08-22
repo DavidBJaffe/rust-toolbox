@@ -1588,7 +1588,9 @@ fn main() {
                 }
             }
             if using.len() != 1 {
-                eprintln!("problem with {}, have {} exons", gene, using.len());
+                eprintln!("\nProblem with {}, have {} exons.", gene, using.len());
+                eprintln!("This needs to be fixed, failing.\n");
+                std::process::exit(1);
             }
             // assert_eq!( using.len(), 1 );
             let k = using[0];
