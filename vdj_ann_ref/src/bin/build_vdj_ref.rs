@@ -292,6 +292,9 @@ fn parse_gtf_file(gtf: &str, demangle: &HashMap<String, String>, exons: &mut Vec
         if cat == "start_codon" || cat == "stop_codon" {
             continue;
         }
+        if cat == "three_prime_utr" && biotype != "IG_C_gene" {
+            continue;
+        }
 
         // Get gene name and demangle.
 
@@ -1483,8 +1486,8 @@ fn main() {
             print_oriented_fasta(&mut out, &header, &seq.slice(0, seq.len()), fw, none);
         }
 
-        // Build the 3' UTR, if there is one.  We allow for the possibility
-        // that there is an intron in the UTR.
+        // Build the 3' UTR for constant region gene, if there is one.  We allow for the
+        // possibility that there is an intron in the UTR.
 
         let mut seq = DnaString::new();
         let trid = &exons[i].7;
