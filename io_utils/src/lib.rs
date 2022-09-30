@@ -12,6 +12,30 @@ use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
 use string_utils::TextUtils;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// PRINT LINE AND FAIL
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+// Macro to exit(1) after printing the given message to stderr.  The use of three eprintln!
+// instances is not quite right because if errors are encountered on multiple threads, these
+// three instances may not be executed contiguously.
+
+#[macro_export]
+macro_rules! fail {
+    ($u:expr) => {
+        eprintln!("");
+        eprintln!( $u );
+        eprintln!("");
+        std::process::exit(1);
+    };
+    ($u:expr, $($x:tt)*) => {
+        eprintln!("");
+        eprintln!( $u, $($x)* );
+        eprintln!("");
+        std::process::exit(1);
+    };
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // GET CONTENTS OF DIRECTORY
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
