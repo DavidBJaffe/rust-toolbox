@@ -463,6 +463,21 @@ pub fn print_tabular_vbox(
         }
     }
 
+    /*
+    // FOR DEBUGGING
+    println!("\ninitial:\n");
+    let mut out = String::new();
+    for i in 0..mat.len() {
+        for j in 0..mat[i].len() {
+            for k in 0..mat[i][j].len() {
+                out.push(mat[i][j][k]);
+            }
+        }
+        out.push('\n');
+    }
+    println!("{out}");
+    */
+
     // "Smooth" edges of hlines.
 
     for i in 0..mat.len() {
@@ -477,6 +492,7 @@ pub fn print_tabular_vbox(
                 && mat[i + 1][j] == vec![verty]
                 && i > 0
                 && mat[i - 1][j] != vec![verty]
+                && mat[i - 1][j] != vec![tee]
             {
                 mat[i][j] = vec![tee];
             } else if j > 0
@@ -636,6 +652,29 @@ mod tests {
                       └────────┴────────┘\n";
         if log != answer {
             println!("\ntest 3 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 4
+
+        let mut rows = Vec::<Vec<String>>::new();
+        let row = vec!["\\hline".to_string(), "\\hline".to_string()];
+        rows.push(row);
+        let row = vec!["hunky".to_string(), "dory".to_string()];
+        rows.push(row);
+        let mut log = String::new();
+        let justify = &[b'l', b'|', b'l'];
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        let answer = "┌───────┬──────┐\n\
+                      ├───────┼──────┤\n\
+                      │hunky  │  dory│\n\
+                      └───────┴──────┘\n";
+        if log != answer {
+            println!("\ntest 4 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
