@@ -474,6 +474,18 @@ pub fn print_tabular_vbox(
                 && mat[i][j + 1] == vec![dash]
                 && i + 1 < mat.len()
                 && j < mat[i + 1].len()
+                && mat[i + 1][j] == vec![verty]
+                && i > 0
+                && mat[i - 1][j] != vec![verty]
+            {
+                mat[i][j] = vec![tee];
+            } else if j > 0
+                && mat[i][j - 1] == vec![dash]
+                && mat[i][j] == vec![verty]
+                && j + 1 < mat[i].len()
+                && mat[i][j + 1] == vec![dash]
+                && i + 1 < mat.len()
+                && j < mat[i + 1].len()
                 && mat[i + 1][j] != vec![verty]
             {
                 mat[i][j] = vec![uptee];
@@ -495,6 +507,12 @@ pub fn print_tabular_vbox(
                 && (j + 1 == mat[i].len() || mat[i][j + 1] != vec![dash])
             {
                 mat[i][j] = vec![righty];
+            } else if j > 0
+                && i + 1 < mat.len()
+                && mat[i][j] == vec![tee]
+                && mat[i + 1][j] != vec![verty]
+            {
+                mat[i][j] = vec![dash];
             }
         }
     }
@@ -524,7 +542,7 @@ pub fn print_tabular_vbox(
 mod tests {
 
     // run this test using:
-    // cargo test -p tenkit2 test_print_tabular_vbox
+    // cargo test -p tables test_print_tabular_vbox -- --nocapture
 
     use crate::print_tabular_vbox;
 
@@ -592,6 +610,32 @@ mod tests {
                       └─────────────────┘\n";
         if log != answer {
             println!("\ntest 2 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 3
+
+        let mut rows = Vec::<Vec<String>>::new();
+        let row = vec!["fabulous pumpkins".to_string(), "\\ext".to_string()];
+        rows.push(row);
+        let row = vec!["\\hline".to_string(), "\\hline".to_string()];
+        rows.push(row);
+        let row = vec!["pencil".to_string(), "pusher".to_string()];
+        rows.push(row);
+        let mut log = String::new();
+        let justify = &[b'l', b'|', b'l'];
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        let answer = "┌─────────────────┐\n\
+                      │fabulous pumpkins│\n\
+                      ├────────┬────────┤\n\
+                      │pencil  │  pusher│\n\
+                      └────────┴────────┘\n";
+        if log != answer {
+            println!("\ntest 3 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
