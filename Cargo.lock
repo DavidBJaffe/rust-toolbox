@@ -1227,6 +1227,7 @@ dependencies = [
 name = "tables"
 version = "0.1.5"
 dependencies = [
+ "ansi_escape",
  "io_utils",
  "itertools",
  "string_utils",
