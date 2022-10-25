@@ -490,13 +490,16 @@ pub fn print_tabular_vbox(
                 && mat[i][j + 1] == vec![dash]
                 && i + 1 < mat.len()
                 && j < mat[i + 1].len()
-                && mat[i + 1][j] == vec![verty]
+                && mat[i + 1][j].ends_with(&[verty])
                 && i > 0
                 && !mat[i - 1][j].ends_with(&[verty])
                 && mat[i - 1][j] != vec![tee]
             {
                 if verbose {
-                    println!("i = {i}, j = {j}, from {} to {tee}", mat[i][j][0]);
+                    println!(
+                        "(verty to tee) i = {i}, j = {j}, from {} to {tee}",
+                        mat[i][j][0]
+                    );
                 }
                 mat[i][j] = vec![tee];
             } else if j > 0
@@ -506,10 +509,13 @@ pub fn print_tabular_vbox(
                 && mat[i][j + 1] == vec![dash]
                 && i + 1 < mat.len()
                 && j < mat[i + 1].len()
-                && mat[i + 1][j] != vec![verty]
+                && !mat[i + 1][j].ends_with(&[verty])
             {
                 if verbose {
-                    println!("i = {i}, j = {j}, from {} to {uptee}", mat[i][j][0]);
+                    println!(
+                        "(verty to uptee) i = {i}, j = {j}, from {} to {uptee}",
+                        mat[i][j][0]
+                    );
                 }
                 mat[i][j] = vec![uptee];
             } else if j > 0
@@ -517,17 +523,26 @@ pub fn print_tabular_vbox(
                 && mat[i][j] == vec![verty]
                 && j + 1 < mat[i].len()
                 && mat[i][j + 1] == vec![dash]
+                && i > 0
+                && (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j] == vec![tee])
             {
                 if verbose {
-                    println!("i = {i}, j = {j}, from {} to {cross}", mat[i][j][0]);
+                    println!(
+                        "(verty to cross) i = {i}, j = {j}, from {} to {cross}",
+                        mat[i][j][0]
+                    );
                 }
                 mat[i][j] = vec![cross];
             } else if mat[i][j] == vec![verty]
                 && j + 1 < mat[i].len()
                 && mat[i][j + 1] == vec![dash]
+                && (j == 0 || !mat[i][j - 1].ends_with(&[dash]))
             {
                 if verbose {
-                    println!("i = {i}, j = {j}, from {} to {lefty}", mat[i][j][0]);
+                    println!(
+                        "(verty to lefty) i = {i}, j = {j}, from {} to {lefty}",
+                        mat[i][j][0]
+                    );
                 }
                 mat[i][j] = vec![lefty];
             } else if j > 0
@@ -536,7 +551,10 @@ pub fn print_tabular_vbox(
                 && (j + 1 == mat[i].len() || mat[i][j + 1] != vec![dash])
             {
                 if verbose {
-                    println!("i = {i}, j = {j}, from {} to {righty}", mat[i][j][0]);
+                    println!(
+                        "(verty to righty) i = {i}, j = {j}, from {} to {righty}",
+                        mat[i][j][0]
+                    );
                 }
                 mat[i][j] = vec![righty];
             } else if j > 0
@@ -580,15 +598,14 @@ mod tests {
     // cargo test -p tables test_print_tabular_vbox -- --nocapture
 
     use crate::print_tabular_vbox;
-    use ansi_escape::emit_end_escape;
+    use ansi_escape::{emit_bold_escape, emit_end_escape};
     use string_utils::stringme;
-
-    // (should add some escape codes)
 
     #[test]
     fn test_print_tabular_vbox() {
         // test 1
 
+        println!("running test 1");
         let mut rows = Vec::<Vec<String>>::new();
         let row = vec![
             "omega".to_string(),
@@ -630,6 +647,7 @@ mod tests {
 
         // test 2
 
+        println!("running test 2");
         let mut rows = Vec::<Vec<String>>::new();
         let row = vec!["pencil".to_string(), "pusher".to_string()];
         rows.push(row);
@@ -656,6 +674,7 @@ mod tests {
 
         // test 3
 
+        println!("running test 3");
         let mut rows = Vec::<Vec<String>>::new();
         let row = vec!["fabulous pumpkins".to_string(), "\\ext".to_string()];
         rows.push(row);
@@ -682,6 +701,7 @@ mod tests {
 
         // test 4
 
+        println!("running test 4");
         let mut rows = Vec::<Vec<String>>::new();
         let row = vec!["\\hline".to_string(), "\\hline".to_string()];
         rows.push(row);
@@ -730,6 +750,67 @@ mod tests {
                       └─┴────┴─┴────┴────┴─┘\n";
         if log != answer {
             println!("\ntest 5 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 6
+
+        println!("running test 6");
+        let mut e = Vec::<u8>::new();
+        emit_bold_escape(&mut e);
+        let start_bold = stringme(&e);
+        let mut e = Vec::<u8>::new();
+        emit_end_escape(&mut e);
+        let stop_bold = stringme(&e);
+        const TOPS: usize = 2;
+        let mut rows = Vec::<Vec<String>>::new();
+        let mut row = vec!["".to_string()];
+        row.append(&mut vec!["\\ext".to_string(); 2]);
+        for j in 0..TOPS {
+            row.push(format!("    {start_bold}gumbo {}{stop_bold}", j + 1));
+            row.append(&mut vec!["\\ext".to_string(); 2]);
+        }
+        row.push("".to_string());
+        rows.push(row);
+        rows.push(vec!["\\hline".to_string(); rows[0].len()]);
+        let mut row = vec![
+            "gerbil".to_string(),
+            "pumpkins".to_string(),
+            "top".to_string(),
+        ];
+        for _ in 0..TOPS {
+            row.append(&mut vec![
+                "dist".to_string(),
+                "gumbo".to_string(),
+                "len".to_string(),
+            ]);
+        }
+        row.push("x".to_string());
+        for j in 0..row.len() {
+            row[j] = format!("{start_bold}{}{stop_bold}", row[j]);
+        }
+        rows.push(row);
+        rows.push(vec!["\\hline".to_string(); rows[0].len()]);
+        rows.push(vec!["0".to_string(); rows[0].len()]);
+        let mut log = String::new();
+        let mut just = b"l".to_vec();
+        for _ in 0..rows[0].len() - 1 {
+            just.append(&mut b"|l".to_vec());
+        }
+        print_tabular_vbox(&mut log, &rows, 0, &just, false, false);
+        let answer = "┌───────────────────┬──────────────┬──────────────┬─┐\n\
+                      │                   │    [01mgumbo 1[0m   │    [01mgumbo 2[0m   │ │\n\
+                      ├──────┬────────┬───┼────┬─────┬───┼────┬─────┬───┼─┤\n\
+                      │[01mgerbil[0m│[01mpumpkins[0m│[01mtop[0m│[01mdist[0m│[01mgumbo[0m│[01mlen[0m│[01mdist[0m│[01mgumbo[0m│[01mlen[0m│[01mx[0m│\n\
+                      ├──────┼────────┼───┼────┼─────┼───┼────┼─────┼───┼─┤\n\
+                      │0     │0       │0  │0   │0    │0  │0   │0    │0  │0│\n\
+                      └──────┴────────┴───┴────┴─────┴───┴────┴─────┴───┴─┘\n";
+        if log != answer {
+            println!("\ntest 6 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
