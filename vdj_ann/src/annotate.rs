@@ -931,51 +931,53 @@ pub fn annotate_seq_core(
     // IGLJn is always paired with IGLCn which is always paired with IGLCn-UTR.  We attempt to
     // enforce this here, in a very weak sense.
 
-    let mut to_delete = vec![false; annx.len()];
-    let mut chains = vec![(0, 0, 0)];
-    for i1 in 0..annx.len() {
-        let t1 = annx[i1].2 as usize;
-        let n1 = &refdata.name[t1];
-        if n1.starts_with("IGLJ") {
-            for i2 in i1 + 1..annx.len() {
-                let t2 = annx[i2].2 as usize;
-                let u2 = refdata.rheaders_orig[t2].contains("3'UTR");
-                let n2 = &refdata.name[t2];
-                if refdata.name[t2].starts_with("IGLC")
-                    && !u2
-                    && n1.after("IGLJ") == n2.after("IGLC")
-                {
-                    for i3 in i2 + 1..annx.len() {
-                        let t3 = annx[i3].2 as usize;
-                        let u3 = refdata.rheaders_orig[t3].contains("3'UTR");
-                        let n3 = &refdata.name[t3];
-                        if refdata.name[t3].starts_with("IGLC") && u3 && n2 == n3 {
-                            chains.push((i1, i2, i3));
+    if annx.len() > 0 {
+        let mut to_delete = vec![false; annx.len()];
+        let mut chains = vec![(0, 0, 0)];
+        for i1 in 0..annx.len() {
+            let t1 = annx[i1].2 as usize;
+            let n1 = &refdata.name[t1];
+            if n1.starts_with("IGLJ") {
+                for i2 in i1 + 1..annx.len() {
+                    let t2 = annx[i2].2 as usize;
+                    let u2 = refdata.rheaders_orig[t2].contains("3'UTR");
+                    let n2 = &refdata.name[t2];
+                    if refdata.name[t2].starts_with("IGLC")
+                        && !u2
+                        && n1.after("IGLJ") == n2.after("IGLC")
+                    {
+                        for i3 in i2 + 1..annx.len() {
+                            let t3 = annx[i3].2 as usize;
+                            let u3 = refdata.rheaders_orig[t3].contains("3'UTR");
+                            let n3 = &refdata.name[t3];
+                            if refdata.name[t3].starts_with("IGLC") && u3 && n2 == n3 {
+                                chains.push((i1, i2, i3));
+                            }
                         }
                     }
                 }
             }
         }
-    }
-    let mut mis = Vec::<usize>::new();
-    for x in chains.iter() {
-        let m = annx[x.0].4.len() + annx[x.1].4.len() + annx[x.2].4.len();
-        mis.push(m);
-    }
-    for j1 in 0..chains.len() {
-        for j2 in 0..chains.len() {
-            if mis[j1] < mis[j2] {
-                if annx[chains[j1].0].0 == annx[chains[j2].0].0
-                    && annx[chains[j1].0].1 == annx[chains[j2].0].1
-                {
-                    to_delete[chains[j2].0] = true;
-                    to_delete[chains[j2].1] = true;
-                    to_delete[chains[j2].2] = true;
+        let mut mis = Vec::<usize>::new();
+        for x in chains.iter() {
+            let m = annx[x.0].4.len() + annx[x.1].4.len() + annx[x.2].4.len();
+            mis.push(m);
+        }
+        for j1 in 0..chains.len() {
+            for j2 in 0..chains.len() {
+                if mis[j1] < mis[j2] {
+                    if annx[chains[j1].0].0 == annx[chains[j2].0].0
+                        && annx[chains[j1].0].1 == annx[chains[j2].0].1
+                    {
+                        to_delete[chains[j2].0] = true;
+                        to_delete[chains[j2].1] = true;
+                        to_delete[chains[j2].2] = true;
+                    }
                 }
             }
         }
+        erase_if(&mut annx, &to_delete);
     }
-    erase_if(&mut annx, &to_delete);
 
     // Remove inferior matches of the edge.  Two alignments are compared if the
     // length of their overlap on the contig is at least 85% of one of the alignment
