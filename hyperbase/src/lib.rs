@@ -153,6 +153,7 @@ pub fn debruijn_to_petgraph_hyperbasevector<K: Kmer>(
 // k-1 bases of e2.  We implement a HyperBasevector here using the graph structure
 // in the petgraph crate.
 
+#[derive(Clone)]
 pub struct HyperBasevector {
     pub k: i32,
     pub g: Graph<u32, DnaString, Directed, u32>,
@@ -232,6 +233,7 @@ impl Default for HyperBasevector {
 // actual paths for each read, but we do not do that here because tracking ids is
 // sufficient for our purposes.
 
+#[derive(Clone)]
 pub struct Hyper {
     pub h: HyperBasevector,
     pub inv: Vec<u32>,
