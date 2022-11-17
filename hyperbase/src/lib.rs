@@ -741,8 +741,7 @@ impl Hyper {
     // Test the involution to see if it is valid.
     // =============================================================================
 
-    #[allow(dead_code)]
-    fn test_involution(&self) {
+    pub fn test_involution(&self) {
         assert_eq!(self.h.g.edge_count(), self.inv.len());
         for e in 0..self.h.g.edge_count() {
             if self.inv[e] >= self.h.g.edge_count() as u32 {
@@ -799,8 +798,7 @@ impl Hyper {
     // Test to see if overlap condition is satisfied.
     // =============================================================================
 
-    #[allow(dead_code)]
-    fn test_overlaps(&self) {
+    pub fn test_overlaps(&self) {
         for v in 0..self.h.g.node_count() {
             for j1 in 0..self.h.g.n_to(v) {
                 let b1 = self.h.g.edge_obj(self.h.g.e_to(v, j1) as u32);
