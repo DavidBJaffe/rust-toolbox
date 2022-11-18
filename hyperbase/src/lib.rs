@@ -745,7 +745,7 @@ impl Hyper {
         assert_eq!(self.h.g.edge_count(), self.inv.len());
         for e in 0..self.h.g.edge_count() {
             if self.inv[e] >= self.h.g.edge_count() as u32 {
-                println!(
+                eprintln!(
                     "inv[{}] = {}, but graph has only {} edges.",
                     e,
                     self.inv[e],
@@ -781,15 +781,15 @@ impl Hyper {
             }
         }
         if !homomorphism_fails.is_empty() {
-            println!("\ntest_involution failed at homomorphism condition");
-            println!(
+            eprintln!("\ntest_involution failed at homomorphism condition");
+            eprintln!(
                 "there were {} fails and {} oks",
                 homomorphism_fails.len(),
                 oks
             );
             let (e1, e2) = (homomorphism_fails[0].0, homomorphism_fails[0].1);
             let (re1, re2) = (self.inv[e1], self.inv[e2]);
-            println!(
+            eprintln!(
                 "first has e1 = {}, e2 = {}, re1 = {}, re2 = {}",
                 e1, e2, re1, re2
             );
