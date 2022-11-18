@@ -755,10 +755,13 @@ impl Hyper {
             }
             assert_eq!(self.inv[self.inv[e as usize] as usize], e as u32);
             let t = self.h.g[EdgeIndex::<u32>::new(e)].rc().to_string();
-            assert_eq!(
-                self.h.g[EdgeIndex::<u32>::new(self.inv[e] as usize)].to_string(),
-                t
-            );
+            if self.h.g[EdgeIndex::<u32>::new(self.inv[e] as usize)].to_string() != t {
+                panic!(
+                    "The inverse of edge {e} is {} but the rc is {}.",
+                    self.h.g[EdgeIndex::<u32>::new(self.inv[e] as usize)].to_string(),
+                    t
+                );
+            }
         }
         let mut homomorphism_fails = Vec::<(usize, usize)>::new();
         let mut oks = 0;
