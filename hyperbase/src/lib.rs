@@ -793,6 +793,16 @@ impl Hyper {
                 "first has e1 = {}, e2 = {}, re1 = {}, re2 = {}",
                 e1, e2, re1, re2
             );
+            eprintln!("{e1} = {}", self.h.g[EdgeIndex::<u32>::new(e1)].to_string());
+            eprintln!("{e2} = {}", self.h.g[EdgeIndex::<u32>::new(e2)].to_string());
+            eprintln!(
+                "{re1} = {}",
+                self.h.g[EdgeIndex::<u32>::new(re1 as usize)].to_string()
+            );
+            eprintln!(
+                "{re2} = {}",
+                self.h.g[EdgeIndex::<u32>::new(re2 as usize)].to_string()
+            );
             panic!("bailing because of test_involution failure");
         }
     }
