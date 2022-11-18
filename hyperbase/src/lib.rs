@@ -493,6 +493,46 @@ impl Hyper {
     }
 
     // =============================================================================
+    // Add an edge and its reverse complement.
+    // This will fail if the end vertices of the edge do not already have edges
+    // abutting them.
+    // =============================================================================
+
+    pub fn add_edge_and_rc(&mut self, edge: &DnaString, v: usize, w: usize) {
+        let n = self.h.g.edge_count() as u32;
+        assert!(self.h.g.n_to(v) > 0 || self.h.g.n_from(v) > 0);
+        assert!(self.h.g.n_to(w) > 0 || self.h.g.n_from(w) > 0);
+        let v_rc;
+        if self.h.g.n_to(v) > 0 {
+            v_rc = self.h.g.to_left(self.inv[self.h.g.e_to(v, 0)]);
+        } else {
+            v_rc = self.h.g.to_right(self.inv[self.h.g.e_from(v, 0)]);
+        }
+        let w_rc;
+        if self.h.g.n_to(w) > 0 {
+            w_rc = self.h.g.to_left(self.inv[self.h.g.e_to(w, 0)]);
+        } else {
+            w_rc = self.h.g.to_right(self.inv[self.h.g.e_from(w, 0)]);
+        }
+        self.h.g.add_edge(
+            NodeIndex::<u32>::new(v),
+            NodeIndex::<u32>::new(w),
+            edge.clone(),
+        );
+        if *edge == edge.rc() {
+            self.inv.push(n);
+        } else {
+            self.h.g.add_edge(
+                NodeIndex::<u32>::new(w_rc as usize),
+                NodeIndex::<u32>::new(v_rc as usize),
+                edge.rc(),
+            );
+            self.inv.push(n + 1);
+            self.inv.push(n);
+        }
+    }
+
+    // =============================================================================
     // Return the read support for an edge.
     // =============================================================================
 
