@@ -1,4 +1,5 @@
 // Copyright (c) 2018 10X Genomics, Inc. All rights reserved.
+// Some code here is based on the BroadCRD codebase.
 
 // Define generic digraph functions.
 //
@@ -56,6 +57,36 @@ pub trait GraphSimple<T> {
 
     fn o_from(&self, v: usize, n: usize) -> &T;
     fn o_to(&self, v: usize, n: usize) -> &T;
+
+    // =============================================================================
+    // source: return if a vertex is a source
+    // sink: return if a vertex is a sink
+    // =============================================================================
+
+    fn source(&self, v: i32) -> bool;
+    fn sink(&self, v: i32) -> bool;
+
+    // =============================================================================
+    // sources: return the ordered list of source vertices
+    // sinks: return the ordered list of sink vertices
+    // =============================================================================
+
+    fn sources(&self) -> Vec<i32>;
+    fn sinks(&self) -> Vec<i32>;
+
+    // =============================================================================
+    // cyclic_core: return the ordered list of vertices that define a subgraph having no
+    // sources and sinks, and which is empty iff the graph is acyclic.
+    // The cyclic core is the union of all vertices that appear in cycles.
+    // =============================================================================
+
+    fn cyclic_core(&self) -> Vec<i32>;
+
+    // =============================================================================
+    // acyclic: return true if graph is acyclic
+    // =============================================================================
+
+    fn acyclic(&self) -> bool;
 
     // =============================================================================
     // get_predecessors: find all vertices which have a directed path to a vertex
@@ -169,6 +200,85 @@ where
 
     fn o_to(&self, v: usize, n: usize) -> &T {
         self.edge_obj(self.e_to(v, n) as u32)
+    }
+
+    fn source(&self, v: i32) -> bool {
+        self.n_to(v as usize) == 0
+    }
+
+    fn sink(&self, v: i32) -> bool {
+        self.n_from(v as usize) == 0
+    }
+
+    fn sources(&self) -> Vec<i32> {
+        let mut s = Vec::<i32>::new();
+        for v in 0..self.node_count() as i32 {
+            if self.source(v) {
+                s.push(v);
+            }
+        }
+        s
+    }
+
+    fn sinks(&self) -> Vec<i32> {
+        let mut s = Vec::<i32>::new();
+        for v in 0..self.node_count() as i32 {
+            if self.sink(v) {
+                s.push(v);
+            }
+        }
+        s
+    }
+
+    // cyclic_core successively deletes vertices and edges from the graph, without actually
+    // deleting them, but tracking instead the number of edges entering and exiting each vertex.
+
+    fn cyclic_core(&self) -> Vec<i32> {
+        let n = self.node_count();
+        let (mut sources, mut sinks) = (self.sources(), self.sinks());
+        let (mut ins, mut outs) = (vec![0; n], vec![0; n]);
+        for v in 0..n {
+            ins[v] = self.n_to(v);
+            outs[v] = self.n_from(v);
+        }
+        for i in 0..sources.len() {
+            let v = sources[i] as usize;
+            outs[v] = 0;
+            for j in 0..self.n_from(v) {
+                let w = self.v_from(v, j);
+                ins[w] -= 1;
+                if ins[w] == 0 {
+                    sources.push(w as i32);
+                }
+            }
+        }
+        for i in 0..sinks.len() {
+            let v = sinks[i] as usize;
+            if ins[v] == 0 {
+                continue;
+            }
+            for j in 0..self.n_to(v) {
+                let w = self.v_to(v, j);
+                if ins[w] == 0 {
+                    continue;
+                }
+                outs[w] -= 1;
+                if outs[w] == 0 {
+                    sinks.push(w as i32);
+                }
+            }
+        }
+        let mut core = Vec::<i32>::new();
+        for v in 0..n {
+            if ins[v] > 0 && outs[v] > 0 {
+                core.push(v as i32);
+            }
+        }
+        core
+    }
+
+    fn acyclic(&self) -> bool {
+        self.cyclic_core().is_empty()
     }
 
     fn get_predecessors(&self, v: &[i32], x: &mut Vec<u32>) {
