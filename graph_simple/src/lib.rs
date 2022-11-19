@@ -241,7 +241,8 @@ where
             ins[v] = self.n_to(v);
             outs[v] = self.n_from(v);
         }
-        for i in 0..sources.len() {
+        let mut i = 0;
+        while i < sources.len() {
             let v = sources[i] as usize;
             outs[v] = 0;
             for j in 0..self.n_from(v) {
@@ -251,10 +252,13 @@ where
                     sources.push(w as i32);
                 }
             }
+            i += 1;
         }
-        for i in 0..sinks.len() {
+        let mut i = 0;
+        while i < sinks.len() {
             let v = sinks[i] as usize;
             if ins[v] == 0 {
+                i += 1;
                 continue;
             }
             for j in 0..self.n_to(v) {
@@ -267,6 +271,7 @@ where
                     sinks.push(w as i32);
                 }
             }
+            i += 1;
         }
         let mut core = Vec::<i32>::new();
         for v in 0..n {
@@ -421,5 +426,31 @@ where
                 std::cmp::Ordering::Equal
             });
         }
+    }
+}
+
+// tests can be run with
+// cargo test -p graph_simple -- --nocapture
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_cyclic_core() {
+        use crate::GraphSimple;
+        use petgraph::graph::DiGraph;
+        let g = DiGraph::<i32, ()>::from_edges(&[(0, 1), (1, 2), (2, 3), (3, 0)]);
+        let core = g.cyclic_core();
+        assert_eq!(core.len(), 4);
+        let g = DiGraph::<i32, ()>::from_edges(&[
+            (0, 1),
+            (1, 2),
+            (1, 3),
+            (2, 3),
+            (2, 4),
+            (3, 4),
+            (4, 5),
+        ]);
+        let core = g.cyclic_core();
+        assert_eq!(core.len(), 0);
     }
 }
