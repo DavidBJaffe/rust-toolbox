@@ -26,7 +26,7 @@ vector_utils = { version = "0.1", path = "../vector_utils" }
 pprof = { version = "0.11", features = ["protobuf-codec", "frame-pointer"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-pprof = { version = "0.11", features = ["protobuf"] }
+pprof = { version = "0.6.2", features = ["protobuf"] }
 
 [dev-dependencies]
 rayon = "1"
