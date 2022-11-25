@@ -369,7 +369,7 @@ pub fn dump_profiling_as_proto(f: &str) {
         let report = REPORT.as_ref().unwrap();
         let profile = report.pprof().unwrap();
         let mut y = Vec::new();
-        profile.encode(&mut y).unwrap();
+        profile.write_to_vec(&mut y).unwrap();
         let mut out = open_for_write_new![&f];
         out.write_all(&y).unwrap();
     }
