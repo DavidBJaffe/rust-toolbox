@@ -782,7 +782,13 @@ impl Hyper {
     // =============================================================================
 
     pub fn test_involution(&self) {
-        assert_eq!(self.h.g.edge_count(), self.inv.len());
+        if self.h.g.edge_count() != self.inv.len() {
+            panic!(
+                "The number of edges is {} but the length of inv is {}.",
+                self.h.g.edge_count(),
+                self.inv.len(),
+            )
+        }
         for e in 0..self.h.g.edge_count() {
             if self.inv[e] >= self.h.g.edge_count() as u32 {
                 eprintln!(
