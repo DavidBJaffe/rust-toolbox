@@ -638,145 +638,137 @@ impl Hyper {
         // Merge these edge pairs, with some exceptions, because of the involution.
         // This is complicated.
 
-        loop {
-            let mut bound = Vec::<(u32, u32)>::new();
-            while !vertex_queue.is_empty() {
-                let v = vertex_queue.pop().unwrap();
-                if !vertex_kill[v.index()] {
-                    continue;
-                }
-                let mut vleft = v;
-                let mut eleft: usize;
-                loop {
-                    vertex_kill[vleft.index()] = false;
-                    eleft = self.h.g.first_edge(vleft, Incoming).unwrap().index();
-                    vleft = self
-                        .h
-                        .g
-                        .edges_directed(vleft, Incoming)
-                        .next()
-                        .unwrap()
-                        .source();
-                    if !vertex_kill[vleft.index()] {
-                        break;
-                    }
-                }
-                let mut eright: usize;
-                let mut vright = v;
-                loop {
-                    vertex_kill[vright.index()] = false;
-                    eright = self.h.g.first_edge(vright, Outgoing).unwrap().index();
-                    vright = self
-                        .h
-                        .g
-                        .edges_directed(vright, Outgoing)
-                        .next()
-                        .unwrap()
-                        .target();
-                    if !vertex_kill[vright.index()] {
-                        break;
-                    }
-                }
-                if eleft < self.inv[eright as usize] as usize {
-                    bound.push((eleft as u32, eright as u32));
-                    bound.push((self.inv[eright], self.inv[eleft]));
+        let mut bound = Vec::<(u32, u32)>::new();
+        while !vertex_queue.is_empty() {
+            let v = vertex_queue.pop().unwrap();
+            if !vertex_kill[v.index()] {
+                continue;
+            }
+            let mut vleft = v;
+            let mut eleft: usize;
+            loop {
+                vertex_kill[vleft.index()] = false;
+                eleft = self.h.g.first_edge(vleft, Incoming).unwrap().index();
+                vleft = self
+                    .h
+                    .g
+                    .edges_directed(vleft, Incoming)
+                    .next()
+                    .unwrap()
+                    .source();
+                if !vertex_kill[vleft.index()] {
+                    break;
                 }
             }
-            let mut new_edge_numbers = Vec::<usize>::new();
-            let mut to_delete = Vec::<u32>::new();
-            let mut have: Vec<u32>;
-            let mut havex: Vec<bool> = vec![false; (maxread + 1) as usize];
-            self.ids.reserve(bound.len());
-            while !bound.is_empty() {
-                let bounds = bound.pop().unwrap();
-                let new_edge_no: usize = self.h.g.edge_count();
-                let mut new_edge = self.h.g.edge_obj(bounds.0).clone();
-                have = self.ids[bounds.0 as usize].clone();
-                for j in 0..have.len() {
-                    havex[have[j] as usize] = true;
-                }
-                to_delete.push(bounds.0);
-                let mut v = self
+            let mut eright: usize;
+            let mut vright = v;
+            loop {
+                vertex_kill[vright.index()] = false;
+                eright = self.h.g.first_edge(vright, Outgoing).unwrap().index();
+                vright = self
                     .h
                     .g
-                    .edge_endpoints(EdgeIndex::<u32>::new(bounds.0 as usize))
+                    .edges_directed(vright, Outgoing)
+                    .next()
                     .unwrap()
-                    .1;
-                loop {
-                    if v == self
-                        .h
-                        .g
-                        .edge_endpoints(EdgeIndex::<u32>::new(bounds.1 as usize))
-                        .unwrap()
-                        .1
-                    {
-                        break;
-                    }
-                    let edge_id = self.h.g.first_edge(v, Outgoing).unwrap();
-                    let edge = self.h.g[edge_id].clone();
-                    for j in 0..self.ids[edge_id.index() as usize].len() {
-                        let id = self.ids[edge_id.index() as usize][j];
-                        if !havex[id as usize] {
-                            have.push(id);
-                            havex[id as usize] = true;
-                        }
-                    }
-                    to_delete.push(edge_id.index() as u32);
-                    for p in (self.h.k - 1)..(edge.len() as i32) {
-                        new_edge.push(edge.get(p as usize))
-                    }
-                    v = self
-                        .h
-                        .g
-                        .edges_directed(v, Outgoing)
-                        .next()
-                        .unwrap()
-                        .target();
+                    .target();
+                if !vertex_kill[vright.index()] {
+                    break;
                 }
-                let v = self
-                    .h
-                    .g
-                    .edge_endpoints(EdgeIndex::<u32>::new(bounds.0 as usize))
-                    .unwrap()
-                    .0;
-                let w = self
+            }
+            if eleft < self.inv[eright as usize] as usize {
+                bound.push((eleft as u32, eright as u32));
+                bound.push((self.inv[eright], self.inv[eleft]));
+            }
+        }
+        let mut new_edge_numbers = Vec::<usize>::new();
+        let mut to_delete = Vec::<u32>::new();
+        let mut have: Vec<u32>;
+        let mut havex: Vec<bool> = vec![false; (maxread + 1) as usize];
+        self.ids.reserve(bound.len());
+        while !bound.is_empty() {
+            let bounds = bound.pop().unwrap();
+            let new_edge_no: usize = self.h.g.edge_count();
+            let mut new_edge = self.h.g.edge_obj(bounds.0).clone();
+            have = self.ids[bounds.0 as usize].clone();
+            for j in 0..have.len() {
+                havex[have[j] as usize] = true;
+            }
+            to_delete.push(bounds.0);
+            let mut v = self
+                .h
+                .g
+                .edge_endpoints(EdgeIndex::<u32>::new(bounds.0 as usize))
+                .unwrap()
+                .1;
+            loop {
+                if v == self
                     .h
                     .g
                     .edge_endpoints(EdgeIndex::<u32>::new(bounds.1 as usize))
                     .unwrap()
-                    .1;
-                self.h.g.add_edge(v, w, new_edge);
-                have.sort_unstable();
-                for j in 0..have.len() {
-                    havex[have[j] as usize] = false;
+                    .1
+                {
+                    break;
                 }
-                self.ids.push(have.clone());
-                new_edge_numbers.push(new_edge_no);
-            }
-            for i in 0..new_edge_numbers.len() {
-                if i % 2 == 1 {
-                    continue;
+                let edge_id = self.h.g.first_edge(v, Outgoing).unwrap();
+                let edge = self.h.g[edge_id].clone();
+                for j in 0..self.ids[edge_id.index() as usize].len() {
+                    let id = self.ids[edge_id.index() as usize][j];
+                    if !havex[id as usize] {
+                        have.push(id);
+                        havex[id as usize] = true;
+                    }
                 }
-                self.inv.push(new_edge_numbers[i + 1] as u32);
-                self.inv.push(new_edge_numbers[i] as u32);
-            }
-
-            // Now again delete edges, as at the beginning.
-
-            self.kill_edges_raw(&to_delete);
-
-            // Remove edgeless vertices.
-
-            for v in (0..self.h.g.node_count()).rev() {
-                if self.h.g.n_to(v) == 0 && self.h.g.n_from(v) == 0 {
-                    self.h.g.remove_node(NodeIndex::<u32>::new(v));
+                to_delete.push(edge_id.index() as u32);
+                for p in (self.h.k - 1)..(edge.len() as i32) {
+                    new_edge.push(edge.get(p as usize))
                 }
+                v = self
+                    .h
+                    .g
+                    .edges_directed(v, Outgoing)
+                    .next()
+                    .unwrap()
+                    .target();
             }
+            let v = self
+                .h
+                .g
+                .edge_endpoints(EdgeIndex::<u32>::new(bounds.0 as usize))
+                .unwrap()
+                .0;
+            let w = self
+                .h
+                .g
+                .edge_endpoints(EdgeIndex::<u32>::new(bounds.1 as usize))
+                .unwrap()
+                .1;
+            self.h.g.add_edge(v, w, new_edge);
+            have.sort_unstable();
+            for j in 0..have.len() {
+                havex[have[j] as usize] = false;
+            }
+            self.ids.push(have.clone());
+            new_edge_numbers.push(new_edge_no);
+        }
+        for i in 0..new_edge_numbers.len() {
+            if i % 2 == 1 {
+                continue;
+            }
+            self.inv.push(new_edge_numbers[i + 1] as u32);
+            self.inv.push(new_edge_numbers[i] as u32);
+        }
 
-            // Break if nothing done.
+        // Now again delete edges, as at the beginning.
 
-            if new_edge_numbers.is_empty() {
-                break;
+        self.kill_edges_raw(&to_delete);
+
+        // Remove edgeless vertices.
+
+        for v in (0..self.h.g.node_count()).rev() {
+            if self.h.g.n_to(v) == 0 && self.h.g.n_from(v) == 0 {
+                self.h.g.remove_node(NodeIndex::<u32>::new(v));
             }
         }
     }
