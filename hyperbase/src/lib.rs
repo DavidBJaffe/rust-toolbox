@@ -773,6 +773,50 @@ impl Hyper {
         }
     }
 
+    // =============================================================================
+    // A version of kill_edges that tries harder to move configurations of the form
+    // * --> * --> *
+    // =============================================================================
+
+    pub fn kill_edges_clean(&mut self, dels: &[u32]) {
+        self.kill_edges(dels);
+        'clean: loop {
+            for v in 0..self.h.g.node_count() {
+                if self.h.g.n_to(v) == 1 && self.h.g.n_from(v) == 1 {
+                    let e = self.h.g.e_to(v, 0);
+                    let f = self.h.g.e_from(v, 0);
+                    let (e_rc, f_rc) = (self.inv[e], self.inv[f]);
+                    let mut vs = Vec::<u32>::new();
+                    vs.push(self.h.g.to_left(e as u32));
+                    vs.push(self.h.g.to_right(e as u32));
+                    vs.push(self.h.g.to_right(f as u32));
+                    vs.push(self.h.g.to_left(f_rc));
+                    vs.push(self.h.g.to_right(f_rc));
+                    vs.push(self.h.g.to_right(e_rc));
+                    unique_sort(&mut vs);
+                    if vs.len() == 6 {
+                        let ef = self.cat(&[e as i32, f as i32]);
+                        self.add_edge_and_rc(
+                            &ef, 
+                            self.h.g.to_left(e as u32) as usize, 
+                            self.h.g.to_right(f as u32) as usize,
+                        );
+                        let mut ids = self.ids[e].clone();
+                        ids.append(&mut self.ids[f].clone());
+                        unique_sort(&mut ids);
+                        self.ids.push(ids);
+                        let mut ids = self.ids[e_rc as usize].clone();
+                        ids.append(&mut self.ids[f_rc as usize].clone());
+                        unique_sort(&mut ids);
+                        self.ids.push(ids);
+                    }
+                    continue 'clean;
+                }
+            }
+            break;
+        }
+    }
+
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     // FUNCTIONS INTENDED MOSTLY FOR DEBUGGING
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
