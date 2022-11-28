@@ -797,8 +797,8 @@ impl Hyper {
                     if vs.len() == 6 {
                         let ef = self.cat(&[e as i32, f as i32]);
                         self.add_edge_and_rc(
-                            &ef, 
-                            self.h.g.to_left(e as u32) as usize, 
+                            &ef,
+                            self.h.g.to_left(e as u32) as usize,
                             self.h.g.to_right(f as u32) as usize,
                         );
                         let mut ids = self.ids[e].clone();
@@ -810,6 +810,7 @@ impl Hyper {
                         unique_sort(&mut ids);
                         self.ids.push(ids);
                     }
+                    self.kill_edges(&[e as u32, f as u32]);
                     continue 'clean;
                 }
             }
