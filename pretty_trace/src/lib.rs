@@ -198,6 +198,7 @@ static mut GUARD: Option<ProfilerGuard<'static>> = None;
 static mut REPORT: Option<pprof::Report> = None;
 
 static mut BLACKLIST: Vec<String> = Vec::new();
+static mut MAX_PROFILE_COUNT: usize = 1_000_000_000;
 
 /// Start profiling, blacklisting the given crates.  
 ///
@@ -217,6 +218,13 @@ pub fn start_profiling(blacklist: &[String]) {
     unsafe {
         BLACKLIST = blacklist.to_vec();
         GUARD = Some(pprof::ProfilerGuard::new(frequency).unwrap());
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn set_max_profiling_count(count: usize) {
+    unsafe {
+        MAX_PROFILE_COUNT = count;
     }
 }
 
@@ -341,6 +349,9 @@ pub fn stop_profiling() {
         );
         let mut total = 0;
         for (i, x) in freq.iter().enumerate() {
+            if i == MAX_PROFILE_COUNT {
+                break;
+            }
             total += x.0 as usize;
             report += &format!(
                 "[{}] COUNT = {} = {:.2}% ⮕ {:.2}%\n{}\n",
