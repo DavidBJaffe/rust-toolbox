@@ -167,6 +167,7 @@ pub fn getrusage() -> rusage {
 
 // Return current memory usage.
 
+#[cfg(not(any(target_os = "macos", target_os = "ios")))]
 pub fn mem_usage_bytes() -> i64 {
     let procfn = "/proc/self/statm".to_string();
     let prob1 = "\nWARNING: mem_usage_bytes( ) failed to access /proc/self/statm.\n";
@@ -187,6 +188,29 @@ pub fn mem_usage_bytes() -> i64 {
         }
     };
     -1_i64
+}
+
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+pub fn mem_usage_bytes() -> i64 {
+    // code taken from sysinfo crate
+    unsafe fn get_task_info(pid: i32) -> libc::proc_taskinfo {
+        let mut task_info = std::mem::zeroed::<libc::proc_taskinfo>();
+        libc::proc_pidinfo(
+            pid,
+            libc::PROC_PIDTASKINFO,
+            0,
+            &mut task_info as *mut libc::proc_taskinfo as *mut libc::c_void,
+            std::mem::size_of::<libc::proc_taskinfo>() as _,
+        );
+        task_info
+    }
+    let memory;
+    unsafe {
+        let pid = std::process::id() as i32;
+        let task_info = get_task_info(pid);
+        memory = task_info.pti_resident_size;
+    }
+    memory as i64
 }
 
 pub fn mem_usage_gb() -> f64 {
