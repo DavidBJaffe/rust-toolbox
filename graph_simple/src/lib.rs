@@ -11,7 +11,7 @@
 
 use petgraph::{prelude::*, EdgeType};
 use std::collections::HashSet;
-use vector_utils::meet;
+use vector_utils::{bin_member, meet};
 
 pub trait GraphSimple<T> {
     // =============================================================================
@@ -77,10 +77,18 @@ pub trait GraphSimple<T> {
     // =============================================================================
     // cyclic_core: return the ordered list of vertices that define a subgraph having no
     // sources and sinks, and which is empty iff the graph is acyclic.
-    // The cyclic core is the union of all vertices that appear in cycles.
+    // The (vertex) cyclic core is the union of all vertices that appear in cycles.
     // =============================================================================
 
     fn cyclic_core(&self) -> Vec<i32>;
+
+    // =============================================================================
+    // cyclic_core_edges: return the ordered list of edges that define a subgraph having no
+    // sources and sinks, and which is empty iff the graph is acyclic.
+    // The (edge) cyclic core is the union of all edges that appear in cycles.
+    // =============================================================================
+
+    fn cyclic_core_edges(&self) -> Vec<u32>;
 
     // =============================================================================
     // acyclic: return true if graph is acyclic
@@ -280,6 +288,22 @@ where
             }
         }
         core
+    }
+
+    fn cyclic_core_edges(&self) -> Vec<u32> {
+        let vert_core = self.cyclic_core();
+        let mut edge_core = Vec::<u32>::new();
+        for v in vert_core.iter() {
+            for i in 0..self.n_from(*v as usize) {
+                let e = self.e_from(*v as usize, i);
+                let w = self.to_right(e as u32);
+                if bin_member(&vert_core, &(w as i32)) {
+                    edge_core.push(e as u32);
+                }
+            }
+        }
+        edge_core.sort();
+        edge_core
     }
 
     fn acyclic(&self) -> bool {
