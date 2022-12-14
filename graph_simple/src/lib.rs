@@ -122,8 +122,8 @@ pub trait GraphSimple<T> {
     fn components(&self, comp: &mut Vec<Vec<u32>>);
 
     // =============================================================================
-    // Find the connected components as lists of edges.  Each component is an
-    // UNSORTED list of edges.
+    // Find the connected components as lists of edges.  Each component is a
+    // sorted list of edges.
     // =============================================================================
 
     fn components_e(&self, comp: &mut Vec<Vec<u32>>);
@@ -426,6 +426,7 @@ where
                     c.push(self.e_from(v as usize, l) as u32);
                 }
             }
+            c.sort();
             comp[j] = c;
         }
     }
