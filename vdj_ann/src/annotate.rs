@@ -2556,7 +2556,6 @@ pub fn annotate_seq_core(
             u.push(t as usize);
         }
     }
-    println!("v.len() == {}, u.len() == {}", v.len(), u.len()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     if v.solo() && u.is_empty() {
         let t = v[0];
         let mut us = Vec::<usize>::new();
@@ -2565,13 +2564,10 @@ pub fn annotate_seq_core(
                 us.push(u);
             }
         }
-        println!("us.len() = {}", us.len()); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         if us.solo() {
             let u = us[0];
             let vstart = annx[vi[0]].0;
-            println!("vstart = {vstart}"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             if vstart > 0 {
-                println!("fixing"); // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
                 let mut annx2 = Vec::<(i32, i32, i32, i32, Vec<i32>)>::new();
                 let ulen = refdata.refs[u].len() as isize;
                 let seq_start = max(0, vstart as isize - ulen);
