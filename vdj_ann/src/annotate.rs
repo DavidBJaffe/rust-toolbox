@@ -2542,7 +2542,7 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
-    // If there is a single V gene, and its UTR is not annotated, attempt to annotate it.
+    // Attempt to add missing 5' UTR.
 
     let (mut v, mut u) = (Vec::<usize>::new(), Vec::<usize>::new());
     let mut vi = Vec::<usize>::new();
@@ -2556,7 +2556,8 @@ pub fn annotate_seq_core(
             u.push(t as usize);
         }
     }
-    if v.solo() && u.is_empty() {
+    unique_sort(&mut v);
+    if v.solo() && annx[vi[0]].3 == 0 && u.is_empty() {
         let t = v[0];
         let mut us = Vec::<usize>::new();
         for u in 0..refdata.name.len() {
