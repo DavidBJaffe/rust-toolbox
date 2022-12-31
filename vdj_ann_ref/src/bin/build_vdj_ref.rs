@@ -477,6 +477,8 @@ fn main() {
 
     // Define lengthenings of human BCR 5' UTRs, starting December 2022.  We do not have a good 
     // mechanism for this and so just delete the gene and then add it back.
+    //
+    // In some cases these are combined with previous gene additions, or previous UTR lengthenings.
 
     if species == "human" {
 
@@ -514,7 +516,7 @@ fn main() {
             "ATGAGGCTCCCTGCTCAGCTCCTGGGGCTGCTAATGCTCTGGGTCCCAGGATCCAGTGGGGATGTTGTGATGACTCAGTCTCCACTCTCCCTGCCCGTCACCCTTGGACAGCCGGCCTCCATCTCCTGCAGGTCTAGTCAAAGCCTCGTATACAGTGATGGAAACACCTACTTGAATTGGTTTCAGCAGAGGCCAGGCCAATCTCCAAGGCGCCTAATTTATAAGGTTTCTAACCGGGACTCTGGGGTCCCAGACAGATTCAGCGGCAGTGGGTCAGGCACTGATTTCACACTGAAAATCAGCAGGGTGGAGGCTGAGGATGTTGGGGTTTATTACTGCATGCAAGGTACACACTGGCCT",
             false,
         ));
-        added_genes_seq.push(("IGKV2-30", "ACTGATCAGGACTCCTCAGTTCACCTTCTCACA", true));
+        added_genes_seq.push(("IGKV2-30", "CCCTTGCCTTGACTGATCAGGACTCCTCAGTTCACCTTCTCACA", true));
 
         // 5
         deleted_genes.push("IGLV8-61");
@@ -569,8 +571,6 @@ fn main() {
             false,
         ));
         added_genes_seq.push(("IGLV3-10", "CTGTGGGCTCAGGAGGCAGAGCTCTGGGAATCTCACC", true));
-
-    }
 
         // 11
         deleted_genes.push("IGLV3-25");
@@ -669,6 +669,30 @@ fn main() {
         ));
         added_genes_seq.push(("IGHV5-51", "ACAGTGAGTCTCCCTCACTGCCCAGCTGGGATCTCAGGGCTTCATTTTCTGTCCTCCACCATC", true));
 
+        // 20
+        // Continuation of earlier change.
+        // Add missing gene IGHV1-2.  This is in GRCm38 and in 10x data.  There is an IMGT
+        // sequence that agrees with it perfectly except for the leader (approximately), but that
+        // sequence is not in our data.
+
+        added_genes_seq.push((
+            "IGHV1-2",
+            "ATGGAATGGAACTGGATACTTCCTTTTATTATGTCAGTAACTGCAGGTGTCTACTCACAGGTTCAGCTCCAGCAGTCTGGGCCTGAGCTGGCAAGGCCTTGGGCTTCAGTGAAGATATCCTGCCAGGCTTTCTACACCTTTTCCAGAAGGGTGCACTTTGCCATTAGGGATACCAACTACTGGATGCAGTGGGTAAAACAGAGGCCTGGACAGGGTCTGGAATGGATCGGGGCTATTTATCCTGGAAATGGTGATACTAGTTACAATCAGAAGTTCAAGGGCAAGGCCACATTGACTGCAGACAAATCCTCCAGCACAGCCTACATGCAACTCAGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGT",
+            false,
+        ));
+        added_genes_seq.push(("IGHV1-2", "GCCCTGAGAGCATCACCCAGCAACCACATCTGTCCTCTAGAGAATCCCCTGAGAGCTCCGTTCCTCACC", true));
+
+        // 21
+        deleted_genes.push("IGHV3-73");
+        added_genes_seq.push((
+            "IGHV3-73",
+            "ATGGAGTTTGGGCTGAGCTGGGTTTTCCTTGTTGCTATTTTAAAAGGTGTCCAGTGTGAGGTGCAGCTGGTGGAGTCCGGGGGAGGCTTGGTCCAGCCTGGGGGGTCCCTGAAACTCTCCTGTGCAGCCTCTGGGTTCACCTTCAGTGGCTCTGCTATGCACTGGGTCCGCCAGGCTTCCGGGAAAGGGCTGGAGTGGGTTGGCCGTATTAGAAGCAAAGCTAACAGTTACGCGACAGCATATGCTGCGTCGGTGAAAGGCAGGTTCACCATCTCCAGAGATGATTCAAAGAACACGGCGTATCTGCAAATGAACAGCCTGAAAACCGAGGACACGGCCGTGTATTACTGTACTAGACA",
+            false,
+        ));
+        added_genes_seq.push(("IGHV3-73", "ACCCTGCAGCTCTGGGAGAGGAGCTCCAGCCTTGGGATTCCCAGCTGTCTCCACTCGGTGATCGGCACTGAATACAGGAGACTCACC", true));
+
+    }
+
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
     // Define older exceptions.
@@ -702,15 +726,6 @@ fn main() {
             107604,
             true,
             "AC244625.2".to_string(),
-        ));
-        added_genes2_source.push((
-            "IGHV1-8",
-            86680235,
-            86680541,
-            86680628,
-            86680673,
-            false,
-            "AC_000146.1".to_string(),
         ));
         right_trims.push(("TRAJ36", -1));
         right_trims.push(("TRAJ37", 3));
@@ -900,19 +915,6 @@ fn main() {
             "GGGAGCTCTGGGAGAGGAGCCCCAGGCCCGGGATTCCCAGGTGTTTCCATTCAGTGATCAGCACTGAAGACAGAAGACTCATC",
             true,
         ));
-
-        // Replace 5' UTR for one gene.  The reference 5' UTR was correct except that it was
-        // too short.  Unfortunately we don't have a good mechanism for replacing a 5' UTR,
-        // so we just delete the gene in its entirety and then add back both the 5' UTR and the
-        // gene sequence.
-
-        deleted_genes.push("IGLV10-54");
-        added_genes_seq.push((
-            "IGLV10-54",
-            "ATGCCCTGGGCTCTGCTCCTCCTGACCCTCCTCACTCACTCTGCAGTGTCAGTGGTCCAGGCAGGGCTGACTCAGCCACCCTCGGTGTCCAAGGGCTTGAGACAGACCGCCACACTCACCTGCACTGGGAACAGCAACATTGTTGGCAACCAAGGAGCAGCTTGGCTGCAGCAGCACCAGGGCCACCCTCCCAAACTCCTATCCTACAGGAATAACAACCGGCCCTCAGGGATCTCAGAGAGATTCTCTGCATCCAGGTCAGGAAACACAGCCTCCCTGACCATTACTGGACTCCAGCCTGAGGACGAGGCTGACTATTACTGCTCAGCATTGGACAGCAGCCTCAGTGCTC",
-            false,
-        ));
-        added_genes_seq.push(("IGLV10-54", "AAACAGAGCTTCAGCAAGCATAGTGGGAATCTGCACC", true));
     }
     if species == "mouse" {
         // Doesn't start with start codon, is labeled a pseudogene by NCBI,
@@ -1175,16 +1177,6 @@ fn main() {
         added_genes_seq.push((
             "IGKV4-56",
             "ATGGATTTTCAGGTGCAGATTTTCAGCTTCCTGCTAATCAGCAGAGTCATACTGTCCAGAGGACAAATTGTTCTCACCCAGTCTCCAGCAATCATGTCTGCATCTCCAGGGCAGAAAGTCACCATAACCTGCAGTGCCATCTCAAGTGTAAATTACATGCACTGGTACCAGCAGAAGCCAGGATCCTCCCCCAAACTCTGGATTTATGCAACATCCAAACTGGCTCTTGGAGTCCCTGCTTGCTTCAGTGGCAGTGGGTCTGGGACCTCTTACTCTCTCACAATCAGCAGCATGGTGGCTGAAGATGCCACCTCTTATTTCTGT",
-            false,
-        ));
-
-        // 7. Add missing gene IGHV1-2.  This is in GRCm38 and in 10x data.  There is an IMGT
-        // sequence that agrees with it perfectly except for the leader (approximately), but that
-        // sequence is not in our data.
-
-        added_genes_seq.push((
-            "IGHV1-2",
-            "ATGGAATGGAACTGGATACTTCCTTTTATTATGTCAGTAACTGCAGGTGTCTACTCACAGGTTCAGCTCCAGCAGTCTGGGCCTGAGCTGGCAAGGCCTTGGGCTTCAGTGAAGATATCCTGCCAGGCTTTCTACACCTTTTCCAGAAGGGTGCACTTTGCCATTAGGGATACCAACTACTGGATGCAGTGGGTAAAACAGAGGCCTGGACAGGGTCTGGAATGGATCGGGGCTATTTATCCTGGAAATGGTGATACTAGTTACAATCAGAAGTTCAAGGGCAAGGCCACATTGACTGCAGACAAATCCTCCAGCACAGCCTACATGCAACTCAGCAGCCTGACATCTGAGGACTCTGCGGTCTATTACTGT",
             false,
         ));
 
