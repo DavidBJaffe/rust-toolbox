@@ -924,7 +924,7 @@ dependencies = [
  "protobuf",
  "protobuf-codegen-pure",
  "smallvec",
- "symbolic-demangle 10.1.5",
+ "symbolic-demangle 10.2.1",
  "tempfile",
  "thiserror",
 ]
@@ -1347,9 +1347,9 @@ dependencies = [
 
 [[package]]
 name = "symbolic-demangle"
-version = "10.1.5"
+version = "10.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fe238e66ada3122c2efe810ba17459df9f7573b45dd523a8057e4c0f515e860"
+checksum = "79be897be8a483a81fff6a3a4e195b4ac838ef73ca42d348b3f722da9902e489"
 dependencies = [
  "cpp_demangle 0.4.0",
  "rustc-demangle",
