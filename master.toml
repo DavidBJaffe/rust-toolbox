@@ -9,7 +9,7 @@ debruijn = "0.3"
 dna = { version = "0.1", path = "../dna" }
 enum-iterator = ">=0.6, <0.8"
 equiv = { version = "0.1", path = "../equiv" }
-evalexpr = "7"
+evalexpr = "8"
 exons = { version = "0.1", path = "../exons" }
 fasta_tools =  { version = "0.1", path = "../fasta_tools" }
 flate2 = "1"
