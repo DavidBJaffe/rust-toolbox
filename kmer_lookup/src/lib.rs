@@ -2,6 +2,9 @@
 
 // Kmer lookup.
 
+use debruijn::kmer::VarIntKmer;
+use debruijn::kmer::K48;
+pub type Kmer48 = VarIntKmer<u64, K48>;
 use debruijn::{
     dna_string::DnaString,
     kmer::{Kmer12, Kmer20},
@@ -35,6 +38,11 @@ pub fn make_kmer_lookup_single<K: Kmer>(dv: &[DnaString], x: &mut Vec<(K, i32, i
 
 /// Included for backward compatibility. Use make_kmer_lookup_single
 pub fn make_kmer_lookup_20_single(dv: &[DnaString], x: &mut Vec<(Kmer20, i32, i32)>) {
+    make_kmer_lookup_single(dv, x);
+}
+
+/// Included for backward compatibility. Use make_kmer_lookup_single
+pub fn make_kmer_lookup_48_single(dv: &[DnaString], x: &mut Vec<(Kmer48, i32, i32)>) {
     make_kmer_lookup_single(dv, x);
 }
 

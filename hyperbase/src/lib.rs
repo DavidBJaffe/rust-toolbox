@@ -3,6 +3,11 @@
 // This file defines a HyperBasevector structure, and a Hyper structure, which
 // is a HyperBasevector plus an involution and read ids for each edge.
 
+use debruijn::kmer::VarIntKmer;
+use debruijn::kmer::K48;
+pub type Kmer48 = VarIntKmer<u64, K48>;
+use kmer_lookup::make_kmer_lookup_48_single;
+
 use debruijn::compression::{compress_kmers, SimpleCompress};
 use debruijn::dna_string::DnaString;
 use debruijn::graph::DebruijnGraph;
@@ -440,6 +445,137 @@ impl Hyper {
                     continue;
                 }
                 let x: Kmer20 = reads[id].get_kmer(pos);
+                let p = bin_position1_3(&kmers_plus, &x);
+                if p < 0 {
+                    continue;
+                }
+                let mut q: Vec<i32> = vec![kmers_plus[p as usize].1];
+                let mut rpos = pos + k as usize;
+                let mut e = kmers_plus[p as usize].1;
+                let mut epos = kmers_plus[p as usize].2 + k;
+                self.ids[e as usize].push(id as u32);
+                loop {
+                    if rpos == reads[id].len() {
+                        break;
+                    }
+                    let mut next = false;
+                    if epos == self.h.bases(e as u32) as i32 {
+                        let v = self.h.g.to_right(e as u32);
+                        for j in 0..self.h.g.n_from(v as usize) {
+                            let f = self.h.g.e_from(v as usize, j);
+                            if self.h.g.edge_obj(f as u32).get((k - 1) as usize)
+                                == reads[id].get(rpos)
+                            {
+                                e = f as i32;
+                                self.ids[e as usize].push(id as u32);
+                                epos = k - 1;
+                                q.push(e);
+                                next = true;
+                                break;
+                            }
+                        }
+                        if !next {
+                            break;
+                        }
+                    }
+                    if !next {
+                        if reads[id].get(rpos) != self.h.g.edge_obj(e as u32).get(epos as usize) {
+                            break;
+                        }
+                        rpos += 1;
+                        epos += 1;
+                    }
+                }
+                next_rpos[id] = (rpos - k as usize + 1) as i32;
+            }
+        }
+        for e in 0..self.h.g.edge_count() {
+            unique_sort(&mut self.ids[e]);
+        }
+        // self.h.test_unique();   // turn on if you want sanity check
+        // self.test_involution(); // turn on if you want sanity check
+        // self.test_overlaps();   // turn on if you want sanity check
+    }
+
+    // =============================================================================
+    // Create a new Hyper from data.  K=48 instead.  Ugh, duplication.
+    // =============================================================================
+
+    pub fn build_from_reads_48(&mut self, k: i32, reads: &[DnaString]) {
+        // Only works if k = 48.
+
+        assert_eq!(k, 48);
+
+        // Build deBruijn graph.
+
+        pub type Kmer1 = kmer::Kmer48;
+        let mut seqs = Vec::new();
+        for r in reads {
+            seqs.push((r.clone(), Exts::empty(), 0));
+        }
+        let summarizer = filter::CountFilterSet::new(1);
+        let mut valid_kmers: Vec<(Kmer1, (Exts, Vec<u32>))> = {
+            let (kmer_hashmap, _) = filter::filter_kmers::<Kmer1, _, _, _, _>(
+                &seqs,
+                &Box::new(summarizer),
+                false,
+                false,
+                4,
+            );
+            drop(seqs);
+            kmer_hashmap
+                .iter()
+                .map(|(k, e, d)| (*k, (*e, d.clone())))
+                .collect()
+        };
+        // ◼ There are several instances of drop here and below.  Why is it that
+        // ◼ rust doesn't drop objects at last usage?
+        valid_kmers.sort();
+        let cmp = SimpleCompress::new(|mut a: Vec<u32>, b: &Vec<u32>| {
+            a.extend(b);
+            a.sort_unstable();
+            a.dedup();
+            a
+        });
+        let graph = compress_kmers(false, &cmp, &valid_kmers).finish_serial();
+        drop(valid_kmers);
+
+        // Translate to graph in which edges are sequences.
+
+        debruijn_to_petgraph_hyperbasevector(&graph, &mut self.h.g, &mut self.inv);
+        drop(graph);
+        self.h.k = k;
+
+        // Build self.ids.
+
+        let evec = Vec::<u32>::new();
+        for _e in 0..self.h.g.edge_count() {
+            self.ids.push(evec.clone());
+        }
+        let mut kmers_plus = Vec::<(Kmer48, i32, i32)>::new();
+        let mut edges = Vec::<DnaString>::new();
+        for e in 0..self.h.g.edge_count() {
+            edges.push(self.h.g.edge_obj(e as u32).clone());
+        }
+        make_kmer_lookup_48_single(&edges, &mut kmers_plus);
+        drop(edges);
+        let mut maxread = 0;
+        for id in 0..reads.len() {
+            maxread = max(maxread, reads[id].len());
+        }
+        if maxread < k as usize {
+            return;
+        }
+        let mut next_rpos: Vec<i32> = vec![0; reads.len()];
+        for pos in 0..maxread - (k as usize) + 1 {
+            for id in 0..reads.len() {
+                if pos + k as usize > reads[id].len() {
+                    continue;
+                }
+                if pos < next_rpos[id] as usize {
+                    continue;
+                }
+                let x: Kmer48 = reads[id].get_kmer(pos);
                 let p = bin_position1_3(&kmers_plus, &x);
                 if p < 0 {
                     continue;
