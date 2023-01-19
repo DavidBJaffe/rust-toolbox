@@ -5,9 +5,9 @@
 
 use debruijn::kmer::VarIntKmer;
 use debruijn::kmer::K40;
-pub type Kmer40 = VarIntKmer<u64, K40>;
+pub type Kmer40 = VarIntKmer<u128, K40>;
 use debruijn::kmer::K48;
-pub type Kmer48 = VarIntKmer<u64, K48>;
+pub type Kmer48 = VarIntKmer<u128, K48>;
 use kmer_lookup::make_kmer_lookup_40_single;
 use kmer_lookup::make_kmer_lookup_48_single;
 

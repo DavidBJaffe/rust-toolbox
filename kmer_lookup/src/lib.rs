@@ -4,9 +4,9 @@
 
 use debruijn::kmer::VarIntKmer;
 use debruijn::kmer::K40;
-pub type Kmer40 = VarIntKmer<u64, K40>;
+pub type Kmer40 = VarIntKmer<u128, K40>;
 use debruijn::kmer::K48;
-pub type Kmer48 = VarIntKmer<u64, K48>;
+pub type Kmer48 = VarIntKmer<u128, K48>;
 use debruijn::{
     dna_string::DnaString,
     kmer::{Kmer12, Kmer20},
