@@ -134,6 +134,13 @@ pub trait GraphSimple<T> {
     // =============================================================================
 
     fn components_e_pos_sorted(&self, comp: &mut Vec<Vec<u32>>);
+
+    // =============================================================================
+    // Determine if two edge paths through the graph could like in a common
+    // superpath.
+    // =============================================================================
+
+    fn copathic(&self, p1: &Vec<u32>, p2: &Vec<u32>) -> bool;
 }
 
 impl<S, T, U, V> GraphSimple<T> for Graph<S, T, U, V>
@@ -374,6 +381,8 @@ where
         self.get_successors(&vs, x);
     }
 
+    // Implementation below is stupid.  Should just see if w is in successors(v).
+
     fn have_path(&self, v: i32, w: i32) -> bool {
         let mut vsuc: Vec<u32> = Vec::new();
         self.get_successors1(v, &mut vsuc);
@@ -451,6 +460,33 @@ where
                 std::cmp::Ordering::Equal
             });
         }
+    }
+
+    fn copathic(&self, p1: &Vec<u32>, p2: &Vec<u32>) -> bool {
+        for i in 0..p1.len() {
+            if p2.starts_with(&p1[i..]) || p1[i..].starts_with(&p2) {
+                return true;
+            }
+        }
+        for i in 0..p2.len() {
+            if p1.starts_with(&p2[i..]) || p2[i..].starts_with(&p1) {
+                return true;
+            }
+        }
+        let v = self.to_right(p1[p1.len() - 1]);
+        let w = self.to_left(p2[0]);
+        let mut suc = Vec::<u32>::new();
+        self.get_successors1(v as i32, &mut suc);
+        if bin_member(&suc, &w) {
+            return true;
+        }
+        let v = self.to_right(p2[p2.len() - 1]);
+        let w = self.to_left(p1[0]);
+        self.get_successors1(v as i32, &mut suc);
+        if bin_member(&suc, &w) {
+            return true;
+        }
+        false
     }
 }
 
