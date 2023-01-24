@@ -282,11 +282,19 @@ pub fn print_tabular_vbox(
                     if j >= rrr[u].len() {
                         eprintln!("\nProblem with line {}, not enough fields.\n", u);
                     }
-                    if rrr[u][j] != *"\\ext" {
+                    if rrr[u][j] != *"\\ext" && rrr[u][j] != *"\\hline" {
                         m = max(m, visible_width(&rrr[u][j]));
                     }
                 }
                 if m > visible_width(&rrr[i][j]) {
+                    if debug_print {
+                        eprintln!(
+                            "adding {} spaces to right of row {i} column {j} because \
+                            visible width = {}",
+                            m - visible_width(&rrr[i][j]),
+                            visible_width(&rrr[i][j]),
+                        );
+                    }
                     for _ in visible_width(&rrr[i][j])..m {
                         rrr[i][j].push(' ');
                     }
@@ -811,6 +819,64 @@ mod tests {
                       └──────┴────────┴───┴────┴─────┴───┴────┴─────┴───┴─┘\n";
         if log != answer {
             println!("\ntest 6 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 7
+
+        println!("running test 7");
+        let mut rows = vec![vec![String::new(); 7]; 5];
+        rows[0][0] = "".to_string();
+        rows[0][1] = "\\ext".to_string();
+        rows[0][2] = " read".to_string();
+        rows[0][3] = "\\ext".to_string();
+        rows[0][4] = " edge".to_string();
+        rows[0][5] = "\\ext".to_string();
+        rows[0][6] = "".to_string();
+        rows[1][0] = "\\hline".to_string();
+        rows[1][1] = "\\hline".to_string();
+        rows[1][2] = "\\hline".to_string();
+        rows[1][3] = "\\hline".to_string();
+        rows[1][4] = "\\hline".to_string();
+        rows[1][5] = "\\hline".to_string();
+        rows[1][6] = "\\hline".to_string();
+        rows[2][0] = "woof".to_string();
+        rows[2][1] = "p".to_string();
+        rows[2][2] = "L".to_string();
+        rows[2][3] = "R".to_string();
+        rows[2][4] = "L".to_string();
+        rows[2][5] = "R".to_string();
+        rows[2][6] = "read".to_string();
+        rows[3][0] = "\\hline".to_string();
+        rows[3][1] = "\\hline".to_string();
+        rows[3][2] = "\\hline".to_string();
+        rows[3][3] = "\\hline".to_string();
+        rows[3][4] = "\\hline".to_string();
+        rows[3][5] = "\\hline".to_string();
+        rows[3][6] = "\\hline".to_string();
+        rows[4][0] = "3".to_string();
+        rows[4][1] = "6".to_string();
+        rows[4][2] = "0".to_string();
+        rows[4][3] = "150".to_string();
+        rows[4][4] = "132".to_string();
+        rows[4][5] = "282".to_string();
+        rows[4][6] = "AGGGATGGTAAGGATGTTTTCATTTGGTGATCAGTTGGGCTGAGCTGGGTTTTCCTT".to_string();
+        let mut log = String::new();
+        print_tabular_vbox(&mut log, &rows, 0, b"l|l|r|r|r|r|l", true, true);
+        let answer =
+            "┏━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
+┃      ┃ read┃ edge  ┃                                                         ┃\n\
+┣━━━━┳━╋━┳━━━╋━━━┳━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫\n\
+┃woof┃p┃L┃  R┃  L┃  R┃read                                                     ┃\n\
+┣━━━━╋━╋━╋━━━╋━━━╋━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃3   ┃6┃0┃150┃132┃282┃AGGGATGGTAAGGATGTTTTCATTTGGTGATCAGTTGGGCTGAGCTGGGTTTTCCTT┃\n\
+┗━━━━┻━┻━┻━━━┻━━━┻━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n";
+        if log != answer {
+            println!("\ntest 7 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
