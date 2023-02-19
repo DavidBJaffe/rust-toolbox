@@ -1235,6 +1235,15 @@ fn main() {
             false,
         ));
         added_genes_seq.push(("IGLV4-60", "AGCGTGGCTGCCTCAGCAGAGCTCTGGGGAGTCTGCACC", true));
+
+        // 60
+        deleted_genes.push("IGKV2D-40");
+        added_genes_seq.push((
+            "IGKV2D-40",
+            "ATGAGGCTCCCTGCTCAGCTCCTGGGGCTGCTAATGCTCTGGGTCCCTGGATCCAGTGAGGATATTGTGATGACCCAGACTCCACTCTCCCTGCCCGTCACCCCTGGAGAGCCGGCCTCCATCTCCTGCAGGTCTAGTCAGAGCCTCTTGGATAGTGATGATGGAAACACCTATTTGGACTGGTACCTGCAGAAGCCAGGGCAGTCTCCACAGCTCCTGATCTATACGCTTTCCTATCGGGCCTCTGGAGTCCCAGACAGGTTCAGTGGCAGTGGGTCAGGCACTGATTTCACACTGAAAATCAGCAGGGTGGAGGCTGAGGATGTTGGAGTTTATTACTGCATGCAACGTATAGAGTTTCCTTC",
+            false,
+        ));
+        added_genes_seq.push(("IGKV2D-40", "ACTGATCAGGACTCCTCAGTTCACCTTCTCACC", true));
     }
 
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -1348,6 +1357,7 @@ fn main() {
         // (see also mouse changes, below)
         // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+        /*
         // 1. Replace IGKV2D-40.  It has a leader sequence of length 9 amino acids, which is an
         // extreme low outlier, and we observe in the whole genome reference and in 10x data a
         // left extension of it whose leader is 20 amino acids long, as expected, and which has a
@@ -1363,6 +1373,7 @@ fn main() {
             89852493,
             true,
         ));
+        */
 
         // 2. Delete IGKV2-18.  We previously added this gene to our reference but it is listed
         // in some places as a pseudogene, and the sequence we provided had a leader of length
@@ -1412,7 +1423,6 @@ fn main() {
             "GAGATTTGGGGGAAGCTCAGCTTCAGCTGCGGGTAGAGAAGACAGGACTCAGGACAATCTCCAGC",
             true,
         ));
-        added_genes_seq.push(("IGKV2D-40", "GGGGATCAGGACTCCTCAGTTCACCTTCTCACC", true));
         added_genes_seq.push(("IGKV1-NL1", "GGGGAGTCAGACCCTGTCAGGACACAGC", true));
         added_genes_seq.push((
             "IGHV1-69-2",
