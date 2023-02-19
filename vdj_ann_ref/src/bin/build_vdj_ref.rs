@@ -198,7 +198,8 @@ fn add_gene<R: Write>(
     to_chr: &HashMap<String, usize>,
     refs: &[DnaString],
     none: bool,
-    is_utr: bool,
+    is_5utr: bool,
+    is_3utr: bool,
     source: &str,
 ) {
     if none {
@@ -209,7 +210,7 @@ fn add_gene<R: Write>(
     }
     let chrid = to_chr[chr];
     let seq = refs[chrid].slice(start - 1, stop);
-    let header = header_from_gene(gene, is_utr, false, record, source);
+    let header = header_from_gene(gene, is_5utr, is_3utr, record, source);
     print_fasta(out, &header, &seq.slice(0, seq.len()), none);
 }
 
@@ -472,6 +473,27 @@ fn main() {
     let mut left_trims = Vec::<(&str, usize)>::new();
     let mut right_trims = Vec::<(&str, i32)>::new();
     let mut added_genes_seq = Vec::<(&str, &str, bool)>::new();
+    let mut added_genes_seq3 = Vec::<(&str, &str, bool)>::new();
+
+    // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+    // Define lengthenings of human BCR 3' UTRs, starting February 2023.  We do not have a good
+    // mechanism for this and so just delete the gene and then add it back.
+
+    if species == "human" {
+        // 1
+        deleted_genes.push("IGLC1");
+        added_genes_seq3.push((
+            "IGLC1",
+            "GTCAGCCCAAGGCCAACCCCACTGTCACTCTGTTCCCGCCCTCCTCTGAGGAGCTCCAAGCCAACAAGGCCACACTAGTGTGTCTGATCAGTGACTTCTACCCGGGAGCTGTGACAGTGGCCTGGAAGGCAGATGGCAGCCCCGTCAAGGCGGGAGTGGAGACCACCAAACCCTCCAAACAGAGCAACAACAAGTACGCGGCCAGCAGCTACCTGAGCCTGACGCCCGAGCAGTGGAAGTCCCACAGAAGCTACAGCTGCCAGGTCACGCATGAAGGGAGCACCGTGGAGAAGACAGTGGCCCCTACAGAATGTTCATAG",
+            false,
+        ));
+        added_genes_seq3.push((
+            "IGLC1",
+            "GTTCCCAACTCTAACCCCACCCACGGGAGCCTGGAGCTGCAGGATCCCAGGGGAGGGGTCTCTCTCCCCATCCCAAGTCATCCAGCCCTTCTCCCTGCACTCATGAAACCCCAATAAATATCCTCATTGACAACCAGAAATCTTGTTTTATCTCATTTTTTTTCTCACATAAATTGCTAGCCTCCCCGGGGTTCTCAGTGTGGGGTACAGGGAATTCTGCACCCAGTGTGAAAATCACCCAAGGGAGGAGGCTCACAGCCTCCCTGAGTCATCTCCCCAGAGGGTCCTTCCTCTCCCAGTCACCCCTTCTCCAACTCTCCACTGTACCCCTGAGCTACCAGTCTGGCATCAGTTCAGACCAGTCCCACACCCTCCTAAATTTTACTTCTCAATAAATACCTGATCA",
+            true,
+        ));
+    }
 
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -2429,6 +2451,7 @@ fn main() {
             &refs,
             none,
             added_genes[i].4,
+            false,
             &source,
         );
     }
@@ -2476,6 +2499,13 @@ fn main() {
         let seq = DnaString::from_dna_string(added_genes_seq[i].1);
         let is_5utr = added_genes_seq[i].2;
         let header = header_from_gene(gene, is_5utr, false, &mut record, &source);
+        print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
+    }
+    for i in 0..added_genes_seq3.len() {
+        let gene = &added_genes_seq3[i].0;
+        let seq = DnaString::from_dna_string(added_genes_seq3[i].1);
+        let is_3utr = added_genes_seq3[i].2;
+        let header = header_from_gene(gene, false, is_3utr, &mut record, &source);
         print_fasta(&mut out, &header, &seq.slice(0, seq.len()), none);
     }
 }
