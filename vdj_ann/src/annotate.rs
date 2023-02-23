@@ -253,6 +253,7 @@ pub fn annotate_seq_core(
     const K: usize = 12;
     const MIN_PERF_EXT: usize = 5;
     const MAX_RATE: f64 = 0.15;
+    const MAX_RATE2: f64 = 0.22;
 
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
@@ -585,7 +586,7 @@ pub fn annotate_seq_core(
     // ◼ Not documented above.
 
     if allow_weak {
-        let max_mis = 5;
+        const MAX_MIS: usize = 10;
         for i in 0..semi.len() {
             let t = semi[i].0;
             let off = semi[i].1;
@@ -602,7 +603,7 @@ pub fn annotate_seq_core(
                 }
                 len += 1;
             }
-            if mis_count <= max_mis && l + len + off == refs[t as usize].len() as i32 {
+            if mis_count <= MAX_MIS && l + len + off == refs[t as usize].len() as i32 {
                 semi[i].3 = len;
                 semi[i].4 = mis;
             }
@@ -622,7 +623,7 @@ pub fn annotate_seq_core(
                 l -= 1;
                 len += 1;
             }
-            if mis_count <= max_mis && l + off == 0 {
+            if mis_count <= MAX_MIS && l + off == 0 {
                 semi[i].2 = l;
                 semi[i].3 = len;
                 semi[i].4 = mis;
@@ -665,7 +666,7 @@ pub fn annotate_seq_core(
                 }
             }
             let nmis = mis1.len() + mis2.len() + mis3.len();
-            if nmis as f64 / ((l2 + len2) - l1) as f64 > MAX_RATE {
+            if nmis as f64 / ((l2 + len2) - l1) as f64 > MAX_RATE2 {
                 continue;
             }
             semi[i1].3 = (l2 + len2) - l1;
@@ -734,10 +735,11 @@ pub fn annotate_seq_core(
         log,
     );
 
-    // If a V gene aligns starting at 0, and goes at least 60% of the way to the end, and there
+    // If a V gene aligns starting at 0, and goes at least 30% of the way to the end, and there
     // is only one alignment of the V gene, extend it to the end.
     // (Only one requirement ameliorated.)
 
+    const NEARNESS: f64 = 0.30;
     let mut i = 0;
     while i < semi.len() {
         let mut j = i + 1;
@@ -766,7 +768,7 @@ pub fn annotate_seq_core(
                 let r = &refs[t];
                 let len = semi[k].3;
                 if ref_start + len < r.len() as i32
-                    && (ref_start + len) as f64 / r.len() as f64 >= 0.60
+                    && (ref_start + len) as f64 / r.len() as f64 >= NEARNESS
                     && len + tig_start < b_seq.len() as i32
                 {
                     let start = ref_start + len;
