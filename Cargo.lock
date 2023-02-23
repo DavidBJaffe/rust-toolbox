@@ -1466,11 +1466,13 @@ dependencies = [
 name = "vdj_ann_ref"
 version = "0.2.1"
 dependencies = [
+ "bio_edit",
  "debruijn",
  "exons",
  "fasta_tools",
  "flate2",
  "io_utils",
+ "itertools",
  "kmer_lookup",
  "perf_stats",
  "pretty_trace",
