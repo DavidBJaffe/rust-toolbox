@@ -1,6 +1,6 @@
 // Copyright (c) 2018 10x Genomics, Inc. All rights reserved.
 
-// Read a fasta file.
+// Tools for working with fasta files.
 
 use debruijn::dna_string::DnaString;
 use flate2::read::MultiGzDecoder;
@@ -8,6 +8,30 @@ use io_utils::open_for_read;
 use std::process::Command;
 use std::{io::prelude::*, path::Path};
 use string_utils::TextUtils;
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+pub fn reverse_complement(x: &[u8]) -> Vec<u8> {
+    let mut x = x.to_vec();
+    let n = x.len();
+    for j in 0..n / 2 {
+        x.swap(j, n - j - 1);
+    }
+    for j in 0..n {
+        if x[j] == b'A' {
+            x[j] = b'T';
+        } else if x[j] == b'C' {
+            x[j] = b'G';
+        } else if x[j] == b'G' {
+            x[j] = b'C';
+        } else if x[j] == b'T' {
+            x[j] = b'A';
+        }
+    }
+    x
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Read a fasta file or gzipped fasta file and convert to a Vec<Vec<u8>>, in which
 // outer vec entries alternate between header lines and base lines.
@@ -64,6 +88,8 @@ pub fn read_fasta_to_vec_vec_u8(f: impl AsRef<Path>) -> Vec<Vec<u8>> {
     };
     x
 }
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // This allows either a fasta file or a gzipped one.  This APPENDS to the
 // dv and headers vectors.
@@ -134,6 +160,8 @@ pub fn read_fasta_into_vec_dna_string_plus_headers(
     };
 }
 
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 pub fn read_fasta_contents_into_vec_dna_string_plus_headers(
     f: &str,
     dv: &mut Vec<DnaString>,
@@ -184,10 +212,9 @@ pub fn read_fasta_headers(f: impl AsRef<Path>, headers: &mut Vec<String>) {
         }
     }
 }
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-// LOAD GENBANK ACCESSION
-// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+// Load a GenBank accession.
 
 pub fn load_genbank_accession(accession: &str, bases: &mut DnaString) {
     let link = format!(
