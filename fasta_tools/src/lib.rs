@@ -208,3 +208,20 @@ pub fn load_genbank_accession(accession: &str, bases: &mut DnaString) {
     fasta = fasta.replace('\n', "");
     *bases = DnaString::from_dna_string(&fasta);
 }
+
+pub fn load_genbank_accession_as_fasta_bytes(accession: &str, bytes: &mut Vec<u8>) {
+    let link = format!(
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/\
+         efetch.fcgi?db=nucleotide&amp;id={}&amp;rettype=fasta",
+        accession
+    );
+    let o = Command::new("csh")
+        .arg("-c")
+        .arg(format!("curl \"{}\"", link))
+        .output()
+        .expect("failed to execute curl command");
+    let fasta = String::from_utf8(o.stdout).expect("Response was not valid utf-8.");
+    assert!(!fasta.contains("moved"));
+    let fasta = fasta.rev_before("\n");
+    *bytes = fasta.as_bytes().to_vec();
+}
