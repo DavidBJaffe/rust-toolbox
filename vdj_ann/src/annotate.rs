@@ -935,6 +935,33 @@ pub fn annotate_seq_core(
 
     if annx.len() > 0 {
         let mut to_delete = vec![false; annx.len()];
+        let mut iglj = Vec::<String>::new();
+        for i in 0..annx.len() {
+            let t = annx[i].2 as usize;
+            let n = &refdata.name[t];
+            if n.starts_with("IGLJ") {
+                iglj.push(n.to_string());
+            }
+        }
+        if !iglj.is_empty() {
+            for i in 0..annx.len() {
+                let t = annx[i].2 as usize;
+                let n = &refdata.name[t];
+                if n.starts_with("IGLC") {
+                    let mut ok = false;
+                    for j in 0..iglj.len() {
+                        if iglj[j].after("IGLJ") == n.after("IGLC") {
+                            ok = true;
+                        }
+                    }
+                    if !ok {
+                        to_delete[i] = true;
+                    }
+                }
+            }
+        }
+        erase_if(&mut annx, &to_delete);
+        let mut to_delete = vec![false; annx.len()];
         let mut chains = vec![(0, 0, 0)];
         for i1 in 0..annx.len() {
             let t1 = annx[i1].2 as usize;
