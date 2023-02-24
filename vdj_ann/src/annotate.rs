@@ -961,13 +961,16 @@ pub fn annotate_seq_core(
             }
         }
         let mut mis = Vec::<usize>::new();
+        let mut ext = Vec::<usize>::new();
         for x in chains.iter() {
             let m = annx[x.0].4.len() + annx[x.1].4.len() + annx[x.2].4.len();
             mis.push(m);
+            let e = annx[x.0].1 + annx[x.1].1 + annx[x.2].1;
+            ext.push(e as usize);
         }
         for j1 in 0..chains.len() {
             for j2 in 0..chains.len() {
-                if mis[j1] < mis[j2] {
+                if mis[j1] < mis[j2] && ext[j1] >= ext[j2] {
                     if annx[chains[j1].0].0 == annx[chains[j2].0].0
                         && annx[chains[j1].0].1 == annx[chains[j2].0].1
                     {
