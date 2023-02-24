@@ -961,8 +961,61 @@ pub fn annotate_seq_core(
             }
         }
         erase_if(&mut annx, &to_delete);
+
+        let mut have3p = false;
+        for i in 0..annx.len() {
+            let t = annx[i].2 as usize;
+            let n = &refdata.name[t];
+            let u = refdata.rheaders_orig[t].contains("3'UTR");
+            if n.starts_with("IGLC") && u {
+                have3p = true;
+            }
+        }
+        if !have3p {
+            let mut to_delete = vec![false; annx.len()];
+            let mut chains2 = vec![(0, 0)];
+            for i1 in 0..annx.len() {
+                let t1 = annx[i1].2 as usize;
+                let n1 = &refdata.name[t1];
+                if n1.starts_with("IGLJ") {
+                    for i2 in i1 + 1..annx.len() {
+                        let t2 = annx[i2].2 as usize;
+                        let u2 = refdata.rheaders_orig[t2].contains("3'UTR");
+                        let n2 = &refdata.name[t2];
+                        if refdata.name[t2].starts_with("IGLC")
+                            && !u2
+                            && n1.after("IGLJ") == n2.after("IGLC")
+                        {
+                            chains2.push((i1, i2));
+                        }
+                    }
+                }
+            }
+            let mut mis = Vec::<usize>::new();
+            let mut ext = Vec::<usize>::new();
+            for x in chains2.iter() {
+                let m = annx[x.0].4.len() + annx[x.1].4.len();
+                mis.push(m);
+                let e = annx[x.0].1 + annx[x.1].1;
+                ext.push(e as usize);
+            }
+            for j1 in 0..chains2.len() {
+                for j2 in 0..chains2.len() {
+                    if mis[j1] < mis[j2] && ext[j1] >= ext[j2] {
+                        if annx[chains2[j1].0].0 == annx[chains2[j2].0].0
+                            && annx[chains2[j1].0].1 == annx[chains2[j2].0].1
+                        {
+                            to_delete[chains2[j2].0] = true;
+                            to_delete[chains2[j2].1] = true;
+                        }
+                    }
+                }
+            }
+            erase_if(&mut annx, &to_delete);
+        }
+
         let mut to_delete = vec![false; annx.len()];
-        let mut chains = vec![(0, 0, 0)];
+        let mut chains3 = vec![(0, 0, 0)];
         for i1 in 0..annx.len() {
             let t1 = annx[i1].2 as usize;
             let n1 = &refdata.name[t1];
@@ -980,7 +1033,7 @@ pub fn annotate_seq_core(
                             let u3 = refdata.rheaders_orig[t3].contains("3'UTR");
                             let n3 = &refdata.name[t3];
                             if refdata.name[t3].starts_with("IGLC") && u3 && n2 == n3 {
-                                chains.push((i1, i2, i3));
+                                chains3.push((i1, i2, i3));
                             }
                         }
                     }
@@ -989,21 +1042,21 @@ pub fn annotate_seq_core(
         }
         let mut mis = Vec::<usize>::new();
         let mut ext = Vec::<usize>::new();
-        for x in chains.iter() {
+        for x in chains3.iter() {
             let m = annx[x.0].4.len() + annx[x.1].4.len() + annx[x.2].4.len();
             mis.push(m);
             let e = annx[x.0].1 + annx[x.1].1 + annx[x.2].1;
             ext.push(e as usize);
         }
-        for j1 in 0..chains.len() {
-            for j2 in 0..chains.len() {
+        for j1 in 0..chains3.len() {
+            for j2 in 0..chains3.len() {
                 if mis[j1] < mis[j2] && ext[j1] >= ext[j2] {
-                    if annx[chains[j1].0].0 == annx[chains[j2].0].0
-                        && annx[chains[j1].0].1 == annx[chains[j2].0].1
+                    if annx[chains3[j1].0].0 == annx[chains3[j2].0].0
+                        && annx[chains3[j1].0].1 == annx[chains3[j2].0].1
                     {
-                        to_delete[chains[j2].0] = true;
-                        to_delete[chains[j2].1] = true;
-                        to_delete[chains[j2].2] = true;
+                        to_delete[chains3[j2].0] = true;
+                        to_delete[chains3[j2].1] = true;
+                        to_delete[chains3[j2].2] = true;
                     }
                 }
             }
