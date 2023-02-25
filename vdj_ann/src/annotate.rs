@@ -2467,6 +2467,8 @@ pub fn annotate_seq_core(
     }
     erase_if(&mut annx, &to_delete);
 
+    // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
     // Add another step to pick between V genes.  We consider only V genes starting at zero.
 
     let mut vs = Vec::<(usize, usize)>::new();
@@ -2492,8 +2494,26 @@ pub fn annotate_seq_core(
                     .abs() as i32;
             }
         }
-        // subtract contig stop point, so errs is not really errs
-        errs -= (annx[vs[k - 1].1].1 + annx[vs[k - 1].1].1) as i32;
+
+        // Define stop point on contig, which is capped by the J start point.
+
+        let mut jstart = 1000000;
+        for i in 0..annx.len() {
+            let t = annx[i].2 as usize;
+            if rheaders[t as usize].contains("J-REGION") {
+                jstart = annx[i].0;
+                break;
+            }
+        }
+        let mut stop = (annx[vs[k - 1].1].1 + annx[vs[k - 1].1].1) as i32;
+        stop = min(stop, jstart as i32);
+
+        // Subtract contig stop point, so errs is not really errs.
+
+        errs -= stop;
+
+        // Save.
+
         e.push(errs);
         j = k;
     }
@@ -2510,6 +2530,8 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut annx, &mut to_delete);
+
+    // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
     // Remove certain subsumed alignments.
 
