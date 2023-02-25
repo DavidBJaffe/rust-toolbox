@@ -26,7 +26,7 @@ use string_utils::{stringme, strme, TextUtils};
 use vdj_types::{VdjChain, VdjRegion};
 use vector_utils::{
     bin_member, erase_if, lower_bound1_3, next_diff12_4, next_diff1_2, next_diff1_3, next_diff1_5,
-    reverse_sort, unique_sort, VecUtils,
+    reverse_sort, sort_sync2, unique_sort, VecUtils,
 };
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -1944,9 +1944,11 @@ pub fn annotate_seq_core(
     // is aligned a lot further, it wins.
 
     let mut lens = vec![0; refdata.refs.len()];
+    let mut start = vec![1000000; refdata.refs.len()];
     for i in 0..annx.len() {
         let t = annx[i].2 as usize;
-        lens[t] += annx[i].3 + annx[i].1;
+        lens[t] = max(lens[t], annx[i].3 + annx[i].1);
+        start[t] = min(start[t], annx[i].3);
     }
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
     for i1 in 0..annx.len() {
@@ -1966,7 +1968,9 @@ pub fn annotate_seq_core(
                 continue;
             }
             const MIN_EXT: i32 = 50;
-            if (p2 > 0 && lens[t1] >= lens[t2]) || (p2 == 0 && lens[t1] >= lens[t2] + MIN_EXT) {
+            if (start[t2] > 0 && lens[t1] >= lens[t2])
+                || (p2 == 0 && lens[t1] >= lens[t2] + MIN_EXT)
+            {
                 if verbose {
                     fwriteln!(log, "");
                     print_alignx(log, &annx[i1], refdata);
@@ -2455,6 +2459,50 @@ pub fn annotate_seq_core(
         }
     }
     erase_if(&mut annx, &to_delete);
+
+    // Add another step to pick between V genes.  We consider only V genes starting at zero.
+
+    let mut vs = Vec::<(usize, usize)>::new();
+    for i in 0..annx.len() {
+        let t = annx[i].2 as usize;
+        if rheaders[t as usize].contains("V-REGION") {
+            vs.push((t, i));
+        }
+    }
+    vs.sort_unstable();
+    let mut e = Vec::<i32>::new();
+    let mut ts = Vec::<i32>::new();
+    let mut j = 0;
+    while j < vs.len() {
+        let k = next_diff1_2(&vs, j as i32) as usize;
+        ts.push(vs[j].0 as i32);
+        let mut errs = annx[vs[j].1].3;
+        for m in j..k {
+            errs += annx[vs[m].1].4.len() as i32;
+            if m > j {
+                errs += (annx[vs[m].1].3 as i32
+                    - (annx[vs[m - 1].1].3 + annx[vs[m - 1].1].1) as i32)
+                    .abs() as i32;
+            }
+        }
+        // subtract contig stop point, so errs is not really errs
+        errs -= (annx[vs[k - 1].1].1 + annx[vs[k - 1].1].1) as i32;
+        e.push(errs);
+        j = k;
+    }
+    sort_sync2(&mut e, &mut ts);
+    let mut to_delete = vec![false; annx.len()];
+    for i in 1..e.len() {
+        if e[i] > e[0] {
+            let t = ts[i];
+            for j in 0..annx.len() {
+                if annx[j].2 == t as i32 {
+                    to_delete[j] = true;
+                }
+            }
+        }
+    }
+    erase_if(&mut annx, &mut to_delete);
 
     // Remove certain subsumed alignments.
 
