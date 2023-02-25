@@ -1512,6 +1512,13 @@ pub fn annotate_seq_core(
         }
         erase_if(&mut annx, &to_delete);
     }
+    let mut to_delete = vec![false; annx.len()];
+    for i in 0..annx.len() {
+        if annx[i].1 == 0 {
+            to_delete[i] = true;
+        }
+    }
+    erase_if(&mut annx, &to_delete);
 
     // Log alignments.
 
