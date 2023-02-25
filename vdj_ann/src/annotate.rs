@@ -1147,8 +1147,14 @@ pub fn annotate_seq_core(
 
             // Overwrite values for m1 and m2.
 
-            m1 = annx[ts[i1].1].4.len() as i32;
-            m2 = annx[ts[i2].1].4.len() as i32;
+            m1 = 0;
+            m2 = 0;
+            for k1 in i1..j1 {
+                m1 += annx[ts[k1].1].4.len() as i32;
+            }
+            for k2 in i2..j2 {
+                m2 += annx[ts[k2].1].4.len() as i32;
+            }
 
             // Get mismatch rates.
 
