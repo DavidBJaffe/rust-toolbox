@@ -1076,6 +1076,8 @@ pub fn annotate_seq_core(
     // Modified: multiple aligns of the same V segment are now group together in
     // the calculation.   And add indel penalty.
     //
+    // Changed again to directly calculate mismatch rates.
+    //
     // ◼ For efficiency, inner loop should check to see if already deleted.
 
     let mut to_delete: Vec<bool> = vec![false; annx.len()];
@@ -1142,6 +1144,11 @@ pub fn annotate_seq_core(
                     }
                 }
             }
+
+            // Overwrite values for m1 and m2.
+
+            m1 = annx[ts[i1].1].4.len() as i32;
+            m2 = annx[ts[i2].1].4.len() as i32;
 
             // Get mismatch rates.
 
