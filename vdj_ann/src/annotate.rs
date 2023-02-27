@@ -971,6 +971,12 @@ pub fn annotate_seq_core(
                 have3p = true;
             }
         }
+        if verbose {
+            fwriteln!(log, "\nALIGNMENTS TWO.A\n");
+            for i in 0..annx.len() {
+                print_alignx(log, &annx[i], refdata);
+            }
+        }
         if !have3p {
             let mut to_delete = vec![false; annx.len()];
             let mut chains2 = vec![(0, 0)];
@@ -1013,7 +1019,12 @@ pub fn annotate_seq_core(
             }
             erase_if(&mut annx, &to_delete);
         }
-
+        if verbose {
+            fwriteln!(log, "\nALIGNMENTS TWO.B\n");
+            for i in 0..annx.len() {
+                print_alignx(log, &annx[i], refdata);
+            }
+        }
         let mut to_delete = vec![false; annx.len()];
         let mut chains3 = vec![(0, 0, 0)];
         for i1 in 0..annx.len() {
@@ -1050,18 +1061,34 @@ pub fn annotate_seq_core(
         }
         for j1 in 0..chains3.len() {
             for j2 in 0..chains3.len() {
+                if chains3[j1].0 == chains3[j2].0 {
+                    continue;
+                }
                 if mis[j1] < mis[j2] && ext[j1] >= ext[j2] {
-                    if annx[chains3[j1].0].0 == annx[chains3[j2].0].0
+                    if annx[chains3[j1].0].0 == annx[chains3[j2].0].0 // same J region start
                         && annx[chains3[j1].0].1 == annx[chains3[j2].0].1
+                    // same J region align len
                     {
-                        to_delete[chains3[j2].0] = true;
-                        to_delete[chains3[j2].1] = true;
-                        to_delete[chains3[j2].2] = true;
+                        if annx[chains3[j1].2].3 <= annx[chains3[j2].2].3 {
+                            // UTR ref start
+                            to_delete[chains3[j2].0] = true;
+                            to_delete[chains3[j2].1] = true;
+                            to_delete[chains3[j2].2] = true;
+                        }
                     }
                 }
             }
         }
         erase_if(&mut annx, &to_delete);
+    }
+
+    // Log alignments.
+
+    if verbose {
+        fwriteln!(log, "\nALIGNMENTS TWO.C\n");
+        for i in 0..annx.len() {
+            print_alignx(log, &annx[i], refdata);
+        }
     }
 
     // Remove inferior matches of the edge.  Two alignments are compared if the
@@ -1237,7 +1264,7 @@ pub fn annotate_seq_core(
     // Log alignments.
 
     if verbose {
-        fwriteln!(log, "\nALIGNMENTS TWO\n");
+        fwriteln!(log, "\nALIGNMENTS THREE\n");
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
@@ -1523,7 +1550,7 @@ pub fn annotate_seq_core(
     // Log alignments.
 
     if verbose {
-        fwriteln!(log, "\nALIGNMENTS THREE\n");
+        fwriteln!(log, "\nALIGNMENTS FOUR\n");
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
@@ -1941,7 +1968,7 @@ pub fn annotate_seq_core(
     // Log alignments.
 
     if verbose {
-        fwriteln!(log, "\nALIGNMENTS FOUR\n");
+        fwriteln!(log, "\nALIGNMENTS FIVE\n");
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
@@ -2183,7 +2210,7 @@ pub fn annotate_seq_core(
     // Log alignments.
 
     if verbose {
-        fwriteln!(log, "\nALIGNMENTS FIVE\n");
+        fwriteln!(log, "\nALIGNMENTS SIX\n");
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
@@ -2397,7 +2424,7 @@ pub fn annotate_seq_core(
     // Log alignments.
 
     if verbose {
-        fwriteln!(log, "\nALIGNMENTS SIX\n");
+        fwriteln!(log, "\nALIGNMENTS SEVEN\n");
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
