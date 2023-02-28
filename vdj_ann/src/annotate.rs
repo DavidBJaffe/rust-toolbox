@@ -257,6 +257,7 @@ pub fn annotate_seq_core(
 
     // Find maximal perfect matches of length >= 20, or 12 for J regions, so long
     // as we have extension to a 20-mer with only one mismatch.
+    // Or 15.
     //
     // perf = {(ref_id, ref_start - tig_start, tig_start, len)}
 
@@ -285,6 +286,9 @@ pub fn annotate_seq_core(
             }
             let mut ok = len >= 20;
             if !ok && allow_weak {
+                if len >= 15 && refdata.is_j(t) {
+                    ok = true;
+                }
                 let mut ext1 = len + 1;
                 let mut lx = l as i32 - 2;
                 let mut px = p as i32 - 2;
