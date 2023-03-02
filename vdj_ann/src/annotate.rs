@@ -1112,6 +1112,13 @@ pub fn annotate_seq_core(
             }
         }
         unique_sort(&mut owned);
+        if verbose {
+            fwriteln!(
+                log,
+                "\nThe observed IGL triples are for {}.",
+                owned.iter().format(",")
+            );
+        }
         let mut to_delete = vec![false; annx.len()];
         for i in 0..annx.len() {
             let t = annx[i].2 as usize;
