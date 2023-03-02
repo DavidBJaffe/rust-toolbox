@@ -1592,26 +1592,28 @@ pub fn annotate_seq_core(
                 }
             }
         }
-        unique_sort(&mut owned);
-        if verbose {
-            fwriteln!(
-                log,
-                "\nThe observed IGL triples are for {}.",
-                owned.iter().format(",")
-            );
-        }
-        let mut to_delete = vec![false; annx.len()];
-        for i in 0..annx.len() {
-            let t = annx[i].2 as usize;
-            let u = refdata.rheaders_orig[t].contains("3'UTR");
-            let n = &refdata.name[t];
-            if n.starts_with("IGLC") && u {
-                if !bin_member(&owned, &n.after("IGLC").to_string()) {
-                    to_delete[i] = true;
+        if owned.len() > 0 {
+            unique_sort(&mut owned);
+            if verbose {
+                fwriteln!(
+                    log,
+                    "\nThe observed IGL triples are for {}.",
+                    owned.iter().format(",")
+                );
+            }
+            let mut to_delete = vec![false; annx.len()];
+            for i in 0..annx.len() {
+                let t = annx[i].2 as usize;
+                let u = refdata.rheaders_orig[t].contains("3'UTR");
+                let n = &refdata.name[t];
+                if n.starts_with("IGLC") && u {
+                    if !bin_member(&owned, &n.after("IGLC").to_string()) {
+                        to_delete[i] = true;
+                    }
                 }
             }
+            erase_if(&mut annx, &to_delete);
         }
-        erase_if(&mut annx, &to_delete);
     }
 
     // Choose between segments if one clearly wins.  For this calculation, we
