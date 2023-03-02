@@ -1086,51 +1086,6 @@ pub fn annotate_seq_core(
             }
         }
         erase_if(&mut annx, &to_delete);
-        let mut owned = Vec::<String>::new();
-        for i1 in 0..annx.len() {
-            let t1 = annx[i1].2 as usize;
-            let n1 = &refdata.name[t1];
-            if n1.starts_with("IGLJ") {
-                for i2 in i1 + 1..annx.len() {
-                    let t2 = annx[i2].2 as usize;
-                    let u2 = refdata.rheaders_orig[t2].contains("3'UTR");
-                    let n2 = &refdata.name[t2];
-                    if refdata.name[t2].starts_with("IGLC")
-                        && !u2
-                        && n1.after("IGLJ") == n2.after("IGLC")
-                    {
-                        for i3 in i2 + 1..annx.len() {
-                            let t3 = annx[i3].2 as usize;
-                            let u3 = refdata.rheaders_orig[t3].contains("3'UTR");
-                            let n3 = &refdata.name[t3];
-                            if refdata.name[t3].starts_with("IGLC") && u3 && n2 == n3 {
-                                owned.push(n1.after("IGLJ").to_string());
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        unique_sort(&mut owned);
-        if verbose {
-            fwriteln!(
-                log,
-                "\nThe observed IGL triples are for {}.",
-                owned.iter().format(",")
-            );
-        }
-        let mut to_delete = vec![false; annx.len()];
-        for i in 0..annx.len() {
-            let t = annx[i].2 as usize;
-            let u = refdata.rheaders_orig[t].contains("3'UTR");
-            let n = &refdata.name[t];
-            if n.starts_with("IGLC") && u {
-                if !bin_member(&owned, &n.after("IGLC").to_string()) {
-                    to_delete[i] = true;
-                }
-            }
-        }
-        erase_if(&mut annx, &to_delete);
     }
 
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -1607,6 +1562,56 @@ pub fn annotate_seq_core(
         for i in 0..annx.len() {
             print_alignx(log, &annx[i], refdata);
         }
+    }
+
+    // Another IGL filtering step.
+
+    if annx.len() > 0 {
+        let mut owned = Vec::<String>::new();
+        for i1 in 0..annx.len() {
+            let t1 = annx[i1].2 as usize;
+            let n1 = &refdata.name[t1];
+            if n1.starts_with("IGLJ") {
+                for i2 in i1 + 1..annx.len() {
+                    let t2 = annx[i2].2 as usize;
+                    let u2 = refdata.rheaders_orig[t2].contains("3'UTR");
+                    let n2 = &refdata.name[t2];
+                    if refdata.name[t2].starts_with("IGLC")
+                        && !u2
+                        && n1.after("IGLJ") == n2.after("IGLC")
+                    {
+                        for i3 in i2 + 1..annx.len() {
+                            let t3 = annx[i3].2 as usize;
+                            let u3 = refdata.rheaders_orig[t3].contains("3'UTR");
+                            let n3 = &refdata.name[t3];
+                            if refdata.name[t3].starts_with("IGLC") && u3 && n2 == n3 {
+                                owned.push(n1.after("IGLJ").to_string());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        unique_sort(&mut owned);
+        if verbose {
+            fwriteln!(
+                log,
+                "\nThe observed IGL triples are for {}.",
+                owned.iter().format(",")
+            );
+        }
+        let mut to_delete = vec![false; annx.len()];
+        for i in 0..annx.len() {
+            let t = annx[i].2 as usize;
+            let u = refdata.rheaders_orig[t].contains("3'UTR");
+            let n = &refdata.name[t];
+            if n.starts_with("IGLC") && u {
+                if !bin_member(&owned, &n.after("IGLC").to_string()) {
+                    to_delete[i] = true;
+                }
+            }
+        }
+        erase_if(&mut annx, &to_delete);
     }
 
     // Choose between segments if one clearly wins.  For this calculation, we
