@@ -1191,14 +1191,6 @@ pub fn annotate_seq_core(
 
             let (r1, r2) = (m1 as f64 / tlen1 as f64, m2 as f64 / tlen2 as f64);
 
-            // Don't allow V to beat J.
-
-            let t1 = annx[ts[i1].1].2 as usize;
-            let t2 = annx[ts[i2].1].2 as usize;
-            if refdata.is_v(t1) && refdata.is_j(t2) {
-                continue;
-            }
-
             // Require that one of the intervals is at least 85% overlapped.
 
             const MIN_OVERLAP_FRAC: f64 = 0.85;
