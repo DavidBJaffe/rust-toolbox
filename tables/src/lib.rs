@@ -488,7 +488,7 @@ pub fn print_tabular_vbox(
 
     // "Smooth" edges of hlines.
 
-    let verbose = false;
+    let verbose = debug_print;
     for i in 0..mat.len() {
         for j in 0..mat[i].len() {
             if j > 0
@@ -521,11 +521,15 @@ pub fn print_tabular_vbox(
             {
                 if verbose {
                     println!(
-                        "(verty to uptee) i = {i}, j = {j}, from {} to {uptee}",
+                        "(verty to uptee maybe) i = {i}, j = {j}, from {} to {uptee}",
                         mat[i][j][0]
                     );
                 }
-                mat[i][j] = vec![uptee];
+                if i == 0 || !mat[i - 1][j].ends_with(&[verty]) {
+                    mat[i][j] = vec![dash];
+                } else {
+                    mat[i][j] = vec![uptee];
+                }
             } else if j > 0
                 && mat[i][j - 1] == vec![dash]
                 && mat[i][j] == vec![verty]
@@ -866,7 +870,7 @@ mod tests {
         rows[4][5] = "282".to_string();
         rows[4][6] = "AGGGATGGTAAGGATGTTTTCATTTGGTGATCAGTTGGGCTGAGCTGGGTTTTCCTT".to_string();
         let mut log = String::new();
-        print_tabular_vbox(&mut log, &rows, 0, b"l|l|r|r|r|r|l", true, true);
+        print_tabular_vbox(&mut log, &rows, 0, b"l|l|r|r|r|r|l", false, true);
         let answer =
             "┏━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
 ┃      ┃ read┃ edge  ┃                                                         ┃\n\
@@ -877,6 +881,68 @@ mod tests {
 ┗━━━━┻━┻━┻━━━┻━━━┻━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n";
         if log != answer {
             println!("\ntest 7 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 8
+
+        println!("running test 8");
+        let mut rows = Vec::<Vec<String>>::new();
+        rows.push(vec![
+            "mangos".to_string(),
+            "   1".to_string(),
+            "\\ext".to_string(),
+            "   2".to_string(),
+            "\\ext".to_string(),
+            "   3".to_string(),
+            "\\ext".to_string(),
+            "   4".to_string(),
+            "\\ext".to_string(),
+            "   5".to_string(),
+            "\\ext".to_string(),
+            "   6".to_string(),
+            "\\ext".to_string(),
+            " total".to_string(),
+            "\\ext".to_string(),
+        ]);
+        rows.push(vec!["\\hline".to_string(); rows[0].len()]);
+        let mut row = vec!["mooom".to_string()];
+        for _ in 0..6 {
+            row.push("   0".to_string());
+            row.push("\\ext".to_string());
+        }
+        row.push(" 100.0".to_string());
+        row.push("\\ext".to_string());
+        rows.push(row);
+        rows.push(vec!["\\hline".to_string(); rows[0].len()]);
+        let mut row = vec!["amplifiers".to_string()];
+        for _ in 0..7 {
+            row.push("n".to_string());
+            row.push("woofy".to_string());
+        }
+        rows.push(row);
+        let mut log = String::new();
+        print_tabular_vbox(
+            &mut log,
+            &rows,
+            0,
+            b"l|r|r|r|r|r|r|r|r|r|r|r|r|r|r",
+            false,
+            false,
+        );
+        let answer = "┌──────────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┐\n\
+│mangos    │   1   │   2   │   3   │   4   │   5   │   6   │ total │\n\
+├──────────┼───────┼───────┼───────┼───────┼───────┼───────┼───────┤\n\
+│mooom     │   0   │   0   │   0   │   0   │   0   │   0   │ 100.0 │\n\
+├──────────┼─┬─────┼─┬─────┼─┬─────┼─┬─────┼─┬─────┼─┬─────┼─┬─────┤\n\
+│amplifiers│n│woofy│n│woofy│n│woofy│n│woofy│n│woofy│n│woofy│n│woofy│\n\
+└──────────┴─┴─────┴─┴─────┴─┴─────┴─┴─────┴─┴─────┴─┴─────┴─┴─────┘\n";
+        if log != answer {
+            println!("\ntest 8 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
