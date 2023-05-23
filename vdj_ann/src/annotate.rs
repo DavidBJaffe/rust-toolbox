@@ -25,8 +25,8 @@ use std::{
 use string_utils::{stringme, strme, TextUtils};
 use vdj_types::{VdjChain, VdjRegion};
 use vector_utils::{
-    bin_member, erase_if, lower_bound1_3, next_diff12_4, next_diff1_2, next_diff1_3, next_diff1_5,
-    reverse_sort, sort_sync2, unique_sort, VecUtils,
+    bin_member, erase_if, lower_bound1_3, next_diff12_3, next_diff12_4, next_diff1_2, next_diff1_3,
+    next_diff1_5, reverse_sort, sort_sync2, sort_sync3, unique_sort, VecUtils,
 };
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -933,6 +933,71 @@ pub fn annotate_seq_core(
             print_alignx(log, &annx[i], refdata);
         }
     }
+
+    // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+    // If there are multiple versions of the same V gene, pick one.  Sometimes.
+
+    let mut to_delete = vec![false; annx.len()];
+    let mut stuff = Vec::<(String, usize, usize)>::new();
+    for i in 0..annx.len() {
+        let mut t = annx[i].2 as usize;
+        if refdata.is_u(t) || refdata.is_v(t) {
+            // Change t so that the V gene and its matching 5' UTR have the same entry.
+            if t > 0 && refdata.is_v(t) && refdata.name[t - 1] == refdata.name[t] {
+                t = t - 1;
+            }
+            stuff.push((refdata.name[t].clone(), t, i));
+        }
+    }
+    stuff.sort();
+    let mut i = 0;
+    while i < stuff.len() {
+        let j = next_diff1_3(&stuff, i as i32) as usize;
+        let mut stuffs = Vec::<Vec<usize>>::new();
+        let mut k = i;
+        while k < j {
+            let l = next_diff12_3(&stuff, k as i32) as usize;
+            let mut s = Vec::<usize>::new();
+            for m in k..l {
+                s.push(stuff[m].2);
+            }
+            stuffs.push(s);
+            k = l;
+        }
+        if stuffs.len() > 1 {
+            let (mut lens, mut diffs) = (Vec::<isize>::new(), Vec::<usize>::new());
+            let mut ids = Vec::<usize>::new();
+            for u in 0..stuffs.len() {
+                let (mut l, mut d) = (0, 0);
+                for v in 0..stuffs[u].len() {
+                    let a = &annx[stuffs[u][v]];
+                    l += a.1;
+                    d += a.4.len();
+                }
+                lens.push(-(l as isize));
+                diffs.push(d);
+                ids.push(u);
+            }
+            sort_sync3(&mut lens, &mut diffs, &mut ids);
+            let mut ok = true;
+            for m in 1..lens.len() {
+                if lens[0] > lens[m] || diffs[0] > diffs[m] {
+                    ok = false;
+                }
+            }
+            if ok {
+                for m in 1..ids.len() {
+                    let id = ids[m];
+                    for i in stuffs[id].iter() {
+                        to_delete[*i] = true;
+                    }
+                }
+            }
+        }
+        i = j;
+    }
+    erase_if(&mut annx, &to_delete);
 
     // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
