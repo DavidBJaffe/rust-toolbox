@@ -26,7 +26,7 @@ use string_utils::{stringme, strme, TextUtils};
 use vdj_types::{VdjChain, VdjRegion};
 use vector_utils::{
     bin_member, erase_if, lower_bound1_3, next_diff12_3, next_diff12_4, next_diff1_2, next_diff1_3,
-    next_diff1_5, reverse_sort, sort_sync2, sort_sync3, unique_sort, VecUtils,
+    next_diff1_5, reverse_sort, sort_sync2, unique_sort, VecUtils,
 };
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -966,8 +966,7 @@ pub fn annotate_seq_core(
             k = l;
         }
         if stuffs.len() > 1 {
-            let (mut lens, mut diffs) = (Vec::<isize>::new(), Vec::<usize>::new());
-            let mut ids = Vec::<usize>::new();
+            let mut ldi = Vec::<(isize, usize, usize)>::new();
             for u in 0..stuffs.len() {
                 let (mut l, mut d) = (0, 0);
                 for v in 0..stuffs[u].len() {
@@ -975,20 +974,18 @@ pub fn annotate_seq_core(
                     l += a.1;
                     d += a.4.len();
                 }
-                lens.push(-(l as isize));
-                diffs.push(d);
-                ids.push(u);
+                ldi.push((-(l as isize), d, u));
             }
-            sort_sync3(&mut lens, &mut diffs, &mut ids);
+            ldi.sort();
             let mut ok = true;
-            for m in 1..lens.len() {
-                if lens[0] > lens[m] || diffs[0] > diffs[m] {
+            for m in 1..ldi.len() {
+                if ldi[0].0 > ldi[m].0 || ldi[0].1 > ldi[m].1 {
                     ok = false;
                 }
             }
             if ok {
-                for m in 1..ids.len() {
-                    let id = ids[m];
+                for m in 1..ldi.len() {
+                    let id = ldi[m].2;
                     for i in stuffs[id].iter() {
                         to_delete[*i] = true;
                     }
