@@ -2922,6 +2922,63 @@ pub fn annotate_seq_core(
         }
     }
 
+    // Attempt to add missing 3' UTR.
+
+    let (mut v, mut u) = (Vec::<usize>::new(), Vec::<usize>::new());
+    let mut vi = Vec::<usize>::new();
+    for i in 0..annx.len() {
+        let t = annx[i].2;
+        if rheaders[t as usize].contains("C-REGION") {
+            v.push(t as usize);
+            vi.push(i);
+        }
+        if rheaders[t as usize].contains("3'UTR") {
+            u.push(t as usize);
+        }
+    }
+    unique_sort(&mut v);
+    if v.solo()
+        && annx[vi[0]].3 + annx[vi[0]].1 == refdata.refs[annx[vi[0]].2 as usize].len() as i32
+        && u.is_empty()
+    {
+        let t = v[0];
+        let mut us = Vec::<usize>::new();
+        if t < refdata.refs.len()
+            && refdata.name[t + 1] == refdata.name[t]
+            && rheaders[t + 1].contains("3'UTR")
+        {
+            us.push(t + 1);
+        }
+        if t > 0 && refdata.name[t - 1] == refdata.name[t] && rheaders[t - 1].contains("3'UTR") {
+            us.push(t - 1);
+        }
+        if us.solo() {
+            let u = us[0];
+            let cend = (annx[vi[0]].0 + annx[vi[0]].1) as isize;
+            if cend < b.len() as isize {
+                let ulen = refdata.refs[u].len() as isize;
+                let seq_start = cend as isize;
+                let match_len = min(ulen, b.len() as isize - cend);
+                let ref_start = 0;
+                let mut mis = Vec::<i32>::new();
+                for i in 0..match_len {
+                    if b.get((seq_start + i) as usize)
+                        != refdata.refs[u].get(ref_start as usize + i as usize)
+                    {
+                        mis.push(i as i32);
+                    }
+                }
+                annx.push((
+                    seq_start as i32,
+                    match_len as i32,
+                    u as i32,
+                    ref_start as i32,
+                    mis,
+                ));
+            }
+        }
+    }
+
     // Transform.
 
     ann.clear();
