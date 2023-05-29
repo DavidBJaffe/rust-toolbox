@@ -2943,13 +2943,14 @@ pub fn annotate_seq_core(
     {
         let t = v[0];
         let mut us = Vec::<usize>::new();
-        if t > 0 && refdata.name[t - 1] == refdata.name[t] && rheaders[t - 1].contains("3'UTR") {
-            us.push(t - 1);
-        } else if t < refdata.refs.len()
+        if t < refdata.refs.len()
             && refdata.name[t + 1] == refdata.name[t]
             && rheaders[t + 1].contains("3'UTR")
         {
             us.push(t + 1);
+        }
+        if t > 0 && refdata.name[t - 1] == refdata.name[t] && rheaders[t - 1].contains("3'UTR") {
+            us.push(t - 1);
         }
         if us.solo() {
             let u = us[0];
