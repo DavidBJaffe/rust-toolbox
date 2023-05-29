@@ -2886,6 +2886,54 @@ pub fn annotate_seq_core(
     unique_sort(&mut v);
     if v.solo() && annx[vi[0]].3 == 0 && u.is_empty() {
         let t = v[0];
+
+        if t > 0 && refdata.name[t - 1] == refdata.name[t] && refdata.is_u(t - 1) {
+            let u = t - 1;
+            let vstart = annx[vi[0]].0;
+            if vstart > 0 {
+                let mut annx2 = Vec::<(i32, i32, i32, i32, Vec<i32>)>::new();
+                let ulen = refdata.refs[u].len() as isize;
+                let seq_start = max(0, vstart as isize - ulen);
+                let match_len = min(ulen, vstart as isize);
+                let ref_start = max(0, ulen - vstart as isize);
+                let mut mis = Vec::<i32>::new();
+                for i in 0..match_len {
+                    if b.get((seq_start + i) as usize)
+                        != refdata.refs[u].get(ref_start as usize + i as usize)
+                    {
+                        mis.push(i as i32);
+                    }
+                }
+                annx2.push((
+                    seq_start as i32,
+                    match_len as i32,
+                    u as i32,
+                    ref_start as i32,
+                    mis,
+                ));
+                annx2.append(&mut annx.clone());
+                annx = annx2;
+            }
+        }
+    }
+
+    // Again attempt to add missing 5' UTR.
+
+    let (mut v, mut u) = (Vec::<usize>::new(), Vec::<usize>::new());
+    let mut vi = Vec::<usize>::new();
+    for i in 0..annx.len() {
+        let t = annx[i].2;
+        if rheaders[t as usize].contains("V-REGION") {
+            v.push(t as usize);
+            vi.push(i);
+        }
+        if rheaders[t as usize].contains("5'UTR") {
+            u.push(t as usize);
+        }
+    }
+    unique_sort(&mut v);
+    if v.solo() && annx[vi[0]].3 == 0 && u.is_empty() {
+        let t = v[0];
         let mut us = Vec::<usize>::new();
         for u in 0..refdata.name.len() {
             if refdata.name[u] == refdata.name[t] && refdata.is_u(u) {
