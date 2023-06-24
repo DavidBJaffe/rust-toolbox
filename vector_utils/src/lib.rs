@@ -301,6 +301,14 @@ pub fn upper_bound1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i64 {
     x.upper_bound_by_key(&d, |(a, _b, _c)| a) as i64
 }
 
+pub fn lower_bound2_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: (&S, &T)) -> i64 {
+    x.lower_bound_by_key(&d, |(a, b, _c)| (a, b)) as i64
+}
+
+pub fn upper_bound2_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: (&S, &T)) -> i64 {
+    x.upper_bound_by_key(&d, |(a, b, _c)| (a, b)) as i64
+}
+
 // Compute the number of instances of a given element in a sorted vector.
 
 pub fn count_instances<T: Ord>(x: &[T], d: &T) -> i32 {
