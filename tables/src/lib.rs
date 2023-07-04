@@ -105,19 +105,13 @@ pub fn print_tabular(
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 // Compute the visible length of a string, counting unicode characters as width one and
-// ignoring some ASCII escape sequences.  Also ignores <...>.
+// ignoring some ASCII escape sequences.
 
 pub fn visible_width(s: &str) -> usize {
     let mut n = 0;
     let mut escaped = false;
-    let mut bracked = false;
     for c in s.chars() {
-        if bracked && c != '>' {
-        } else if c == '<' {
-            bracked = true;
-        } else if bracked && c == '>' {
-            bracked = false;
-        } else if escaped && c != 'm' {
+        if escaped && c != 'm' {
         } else if c == '' {
             escaped = true;
         } else if escaped && c == 'm' {
@@ -136,8 +130,6 @@ pub fn visible_width(s: &str) -> usize {
 // extra vertical bars.  The argument justify consists of symbols l and r, denoting
 // left and right justification for given columns, respectively, and the symbol | to
 // denote a vertical bar.
-//
-// Sequences in <...> are treated as invisible.
 //
 // There is no separation printed on the far left or far right.
 //
