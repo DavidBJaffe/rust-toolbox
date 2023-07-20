@@ -23,6 +23,7 @@ impl BinaryInputOutputSafe for u64 {}
 impl BinaryInputOutputSafe for f32 {}
 impl BinaryInputOutputSafe for f64 {}
 impl BinaryInputOutputSafe for ([u8; 5], [u8; 3]) {}
+impl BinaryInputOutputSafe for ([u8; 20], u32, u32) {}
 // i128, u128?
 
 use std::io::Error;
