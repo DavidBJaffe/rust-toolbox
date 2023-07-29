@@ -1317,6 +1317,13 @@ pub fn annotate_seq_core(
                             );
                         }
                     }
+                    let mut flag = false;
+                    // Crappy weakening, reflecting that we're not using the 5' UTR.
+                    if refdata.rheaders_orig[ts[i2].0].contains("V-REGION") {
+                        if m2 == m1 + 1 {
+                            flag = true;
+                        }
+                    }
                     for k in i2..j2 {
                         if refdata.is_u(ts[k].0) {
                             continue;
@@ -1324,7 +1331,9 @@ pub fn annotate_seq_core(
                         if refdata.rheaders_orig[ts[k].0].contains("3'UTR") {
                             continue;
                         }
-                        to_delete[ts[k].1] = true;
+                        if !flag {
+                            to_delete[ts[k].1] = true;
+                        }
                     }
                 }
             }
