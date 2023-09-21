@@ -233,7 +233,7 @@ pub fn set_max_profiling_count(count: usize) {
 /// The functions stop_profiling and dump_profiling_as_proto can both be run, in either order.
 
 #[cfg(not(target_os = "windows"))]
-pub fn stop_profiling() {
+pub fn stop_profiling() -> String {
     unsafe {
         if REPORT.is_none() {
             let report = GUARD.as_ref().unwrap().report().build();
@@ -362,7 +362,7 @@ pub fn stop_profiling() {
                 x.1
             );
         }
-        print!("{}", report);
+        return report;
     };
 }
 
