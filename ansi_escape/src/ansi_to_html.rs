@@ -188,6 +188,55 @@ pub fn convert_text_with_ansi_escapes_to_html(
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+pub fn convert_text_with_ansi_escapes_to_html_simple(x: &str) -> String {
+    let y: Vec<char> = x.chars().collect();
+    let mut html = String::new();
+    let mut states = Vec::<ColorState>::new();
+    let mut current_state = ColorState::default();
+    let mut i = 0;
+    while i < y.len() {
+        if y[i] != '' {
+            if !states.is_empty() {
+                let new_state = merge(&states);
+                if new_state != current_state {
+                    if !current_state.null() && !new_state.null() {
+                        html += "</span>";
+                    }
+                    html += &new_state.html();
+                    current_state = new_state;
+                }
+                states.clear();
+            }
+            if y[i] != '<' {
+                html.push(y[i]);
+            } else {
+                html += "&lt;";
+            }
+            i += 1;
+        } else {
+            let mut j = i + 1;
+            loop {
+                if y[j] == 'm' {
+                    break;
+                }
+                j += 1;
+            }
+            let mut e = Vec::<u8>::new();
+            for m in i..=j {
+                e.push(y[m] as u8);
+            }
+            states.push(ansi_escape_to_color_state(&e));
+            i = j + 1;
+        }
+    }
+    if !states.is_empty() {
+        html += &merge(&states).html();
+    }
+    format!("{}", html)
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 // Remove redundant ansi escape sequences.  Note that this only recognizes certain escapes.
 
 pub fn compress_ansi_escapes(x: &str) -> String {
