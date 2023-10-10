@@ -400,18 +400,28 @@ pub fn print_tabular_vbox(
                     }
                 }
             }
-            if vert[j] && rrr[i][j + 1] != "\\ext" {
+            if vert[j] && j + 1 >= rrr[i].len() {
                 if debug_print {
                     println!("1 - pushing {} onto row {}, j = {}", verty, i, j);
                 }
                 log.push(verty);
-                if rrr[i][j + 1] == *"\\hline" {
-                    for _ in 0..sep {
-                        log.push(dash);
+                for _ in 0..sep {
+                    log.push(' ');
+                }
+            } else {
+                if vert[j] && rrr[i][j + 1] != "\\ext" {
+                    if debug_print {
+                        println!("1 - pushing {} onto row {}, j = {}", verty, i, j);
                     }
-                } else {
-                    for _ in 0..sep {
-                        log.push(' ');
+                    log.push(verty);
+                    if rrr[i][j + 1] == *"\\hline" {
+                        for _ in 0..sep {
+                            log.push(dash);
+                        }
+                    } else {
+                        for _ in 0..sep {
+                            log.push(' ');
+                        }
                     }
                 }
             }
