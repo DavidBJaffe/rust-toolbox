@@ -442,7 +442,9 @@ pub fn print_tabular_vbox(
             log.push(dash);
         }
         if vert[i] {
-            if rrr[rrr.len() - 1][i + 1] != "\\ext" {
+            if i + 1 >= rrr[rrr.len() - 1].len() {
+                log.push(dash);
+            } else if rrr[rrr.len() - 1][i + 1] != "\\ext" {
                 log.push(uptee);
             } else {
                 log.push(dash);
