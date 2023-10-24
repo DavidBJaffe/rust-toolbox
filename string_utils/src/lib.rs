@@ -23,6 +23,7 @@ pub trait TextUtils<'a> {
     fn force_usize(&self) -> usize;
     fn force_i32(&self) -> i32;
     fn force_i64(&self) -> i64;
+    fn force_u16(&self) -> u16;
     fn force_u64(&self) -> u64;
     fn force_f64(&self) -> f64;
 
@@ -69,6 +70,10 @@ impl<'a> TextUtils<'a> for str {
     fn force_i64(&self) -> i64 {
         self.parse::<i64>()
             .unwrap_or_else(|_| panic!("could not convert \"{}\" to i64", self))
+    }
+    fn force_u16(&self) -> u16 {
+        self.parse::<u16>()
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to u16", self))
     }
     fn force_u64(&self) -> u64 {
         self.parse::<u64>()
