@@ -519,6 +519,20 @@ pub fn sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
     *s2 = permutation.apply_slice(&s2[..]);
 }
 
+pub fn reverse_sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+) {
+    let permutation = permutation::sort(&t[..]);
+    *t = permutation.apply_slice(&t[..]);
+    *s1 = permutation.apply_slice(&s1[..]);
+    *s2 = permutation.apply_slice(&s2[..]);
+    t.reverse();
+    s1.reverse();
+    s2.reverse();
+}
+
 pub fn sort_sync4<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone, S3: Ord + Clone>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
