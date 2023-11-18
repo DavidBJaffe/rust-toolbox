@@ -512,6 +512,7 @@ pub fn print_tabular_vbox(
                 && j < mat[i + 1].len()
                 && mat[i + 1][j].ends_with(&[verty])
                 && i > 0
+                && mat[i - 1].len() > j
                 && !mat[i - 1][j].ends_with(&[verty])
                 && mat[i - 1][j] != vec![tee]
             {
