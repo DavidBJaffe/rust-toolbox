@@ -549,6 +549,7 @@ pub fn print_tabular_vbox(
                 && j + 1 < mat[i].len()
                 && mat[i][j + 1] == vec![dash]
                 && i > 0
+                && j < mat[i - 1].len()
                 && (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j] == vec![tee])
             {
                 if verbose {
