@@ -382,7 +382,52 @@ pub fn print_tabular_vbox(
         print!("{log2}");
     }
 
+    /*
+
     // Add space according to ext entries.
+
+    for i in 0..rrr.len() {
+        for j in 0..ncols {
+            if rrr[i][j] == "\\ext" || rrr[i][j] == "\\hline" {
+                continue;
+            }
+            if j < ncols - 1 && rrr[i][j + 1] == "\\ext" {
+                continue;
+            }
+            let w = visible_width(&rrr[i][j]);
+            if xw[j] > w {
+                let add = xw[j] - w;
+                if just[j] == b'l' {
+                    println!("({}, {}) adding {add} on right", i + 1, j + 1);
+                    for _ in 0..add {
+                        rrr[i][j].push(' ');
+                    }
+                } else {
+                    println!("({}, {}) adding {add} on left", i + 1, j + 1);
+                    for _ in 0..add {
+                        rrr[i][j] = " ".to_string() + &mut rrr[i][j].clone();
+                    }
+                }
+            }
+        }
+    }
+
+    // Update maxcol.
+
+    let mut maxcol = vec![0; ncols];
+    for i in 0..rrr.len() {
+        for j in 0..rrr[i].len() {
+            if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" {
+                continue;
+            }
+            if rrr[i][j] == *"\\ext" || rrr[i][j] == *"\\hline" {
+                continue;
+            }
+            maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
+        }
+    }
+
+    */
 
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
