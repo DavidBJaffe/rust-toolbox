@@ -302,8 +302,52 @@ pub fn print_tabular_vbox(
             j = k;
         }
     }
+
+    // Now, in a truly moronic fashion, find a solution to the linear programming problem of
+    // minimizing x1 + ... + xn, subject to these constraints.
+    // The solution here progressively increments the variables until all the constraints are
+    // satisfied.  We could use an actual linear programming solver if we could find one that is
+    // pure rust, appropriately licensed, and suitably general.
+
+    let mut xw = vec![0; ncols];
+    let mut deficit = 0;
+    for i in 0..rhs.len() {
+        deficit += rhs[i];
+    }
+    loop {
+        let mut best_improvement = 0;
+        let mut best_i = 0;
+        for i in 0..ncols {
+            let mut xw_new = xw.clone();
+            xw_new[i] += 1;
+            let mut current_deficit = 0;
+            for j in 0..lhs.len() {
+                let mut sum = 0;
+                for k in 0..ncols {
+                    if lhs[j][k] {
+                        sum += xw_new[k];
+                    }
+                }
+                if sum < rhs[j] {
+                    current_deficit += rhs[j] - sum;
+                }
+            }
+            if current_deficit < deficit {
+                let improvement = deficit - current_deficit;
+                if improvement > best_improvement {
+                    best_improvement = improvement;
+                    best_i = i;
+                }
+            }
+        }
+        xw[best_i] += 1;
+        deficit -= best_improvement;
+        if deficit == 0 {
+            break;
+        }
+    }
     if debug_print {
-        println!("\nlinear constraints");
+        println!("\nlinear constraints and solution");
         let mut rows = Vec::<Vec<String>>::new();
         for i in 0..lhs.len() {
             let mut row = Vec::<String>::new();
@@ -320,6 +364,12 @@ pub fn print_tabular_vbox(
             }
             justify.push(b'r');
         }
+        rows.push(vec!["\\hline".to_string(); ncols]);
+        let mut row = Vec::<String>::new();
+        for i in 0..xw.len() {
+            row.push(xw[i].to_string());
+        }
+        rows.push(row);
         print_tabular_vbox(&mut log, &rows, 0, &justify, false, false);
         let mut log2 = String::new();
         for (z, line) in log.lines().enumerate() {
