@@ -158,6 +158,9 @@ pub fn print_tabular_vbox(
     debug_print: bool,
     bold_box: bool,
 ) {
+    // If you've added a test that fails and are trying to get it work, temporarily change
+    // the next to the last entry in the print_tabular_vbox line for the test to true.
+
     // Define box characters.
 
     let dash = if !bold_box { '─' } else { '━' };
@@ -228,15 +231,42 @@ pub fn print_tabular_vbox(
             maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
         }
     }
+    let mut orig_vis_widths = vec![Vec::<usize>::new(); rrr.len()];
+    for i in 0..rrr.len() {
+        for j in 0..rrr[i].len() {
+            orig_vis_widths[i].push(visible_width(&rrr[i][j]));
+        }
+    }
     if debug_print {
         println!("maxcol = {}", maxcol.iter().format(","));
+        println!("\nvisible widths");
+        let mut vis = rrr.clone();
+        for i in 0..vis.len() {
+            for j in 0..vis[i].len() {
+                vis[i][j] = visible_width(&rrr[i][j]).to_string();
+            }
+        }
+        let mut log = String::new();
+        let mut justify = Vec::<u8>::new();
+        for i in 0..vis[0].len() {
+            if i > 0 {
+                justify.push(b'|');
+            }
+            justify.push(b'r');
+        }
+        print_tabular_vbox(&mut log, &vis, 0, &justify, false, false);
+        print!("{log}");
     }
 
     // Add space according to ext entries.
 
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
+            // Test if matrix entry is not \\ext and the following entry is also not.
+
             if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" && rrr[i][j] != *"\\ext" {
+                // Find the largest block j..k that does not include an ext column.
+
                 let mut k = j + 1;
                 while k < rrr[i].len() {
                     if rrr[i][k] != *"\\ext" {
@@ -244,7 +274,13 @@ pub fn print_tabular_vbox(
                     }
                     k += 1;
                 }
+
+                // Figure out how much space to add.  Defined *need* to be the width of the jth
+                // entry in column i.  Define *have* to be the sum across l in j..k of the
+                // maximum of column width entries, with addition for separation.
+
                 let need = visible_width(&rrr[i][j]);
+                // let need = orig_vis_widths[i][j];
                 let mut have = 0;
                 for l in j..k {
                     have += maxcol[l];
@@ -256,20 +292,24 @@ pub fn print_tabular_vbox(
                     }
                 }
                 if debug_print {
-                    println!("row {} column {}, have = {}, need = {}", i, j, have, need);
+                    println!(
+                        "\nrow {i} columns {j}-{k} = {}",
+                        rrr[i][j..k].iter().format(",")
+                    );
+                    println!("row {i} columns {j}-{k}, have = {have}, need = {need}");
                 }
+
+                // If have exceeds need, add have - need spaces to the right of the (i,j)th entry.
+
                 if have > need {
                     if debug_print {
-                        println!(
-                            "adding {} spaces to right of row {} col {}",
-                            have - need,
-                            i,
-                            j
-                        );
+                        println!("adding {} spaces to right of row {i} col {j}", have - need,);
                     }
                     for _ in need..have {
                         rrr[i][j].push(' ');
                     }
+
+                // If instead need exceeds have, add to ext[k-1].  This is used later.
                 } else if need > have {
                     maxcol[k - 1] += need - have;
                     if debug_print {
@@ -277,6 +317,9 @@ pub fn print_tabular_vbox(
                     }
                     ext[k - 1] += need - have;
                 }
+
+                // Look at the widths of column j entries and see if that means we need more space.
+
                 let mut m = 0;
                 for u in 0..rrr.len() {
                     if j >= rrr[u].len() {
@@ -284,18 +327,23 @@ pub fn print_tabular_vbox(
                     }
                     if rrr[u][j] != *"\\ext" && rrr[u][j] != *"\\hline" {
                         m = max(m, visible_width(&rrr[u][j]));
+                        // m = max(m, orig_vis_widths[u][j]);
                     }
                 }
                 if m > visible_width(&rrr[i][j]) {
+                    // if m > orig_vis_widths[i][j] {
                     if debug_print {
                         eprintln!(
                             "adding {} spaces to right of row {i} column {j} because \
                             visible width = {}",
                             m - visible_width(&rrr[i][j]),
+                            // m - orig_vis_widths[i][j],
                             visible_width(&rrr[i][j]),
+                            // orig_vis_widths[i][j],
                         );
                     }
                     for _ in visible_width(&rrr[i][j])..m {
+                        // for _ in orig_vis_widths[i][j]..m {
                         rrr[i][j].push(' ');
                     }
                 }
@@ -961,5 +1009,48 @@ mod tests {
         if log != answer {
             panic!();
         }
+
+        // test 9
+
+        /*
+        println!("running test 9");
+        let rows0 = vec![
+            vec!["WOOFITY", "\\ext", "\\ext", "\\ext", "\\ext", "\\ext"],
+            vec!["\\hline"; 6],
+            vec!["gerbil", "\\ext", "\\ext", "hippo", "\\ext", "\\ext"],
+            vec!["\\hline"; 6],
+            vec!["A", "B", "C", "D", "E", "F"],
+            vec!["\\hline"; 6],
+            vec!["5", "0", "13", "18", "102", "5"],
+        ];
+        let mut rows = Vec::<Vec<String>>::new();
+        for x in rows0.iter() {
+            let mut r = Vec::<String>::new();
+            for i in 0..x.len() {
+                r.push(x[i].to_string());
+            }
+            rows.push(r);
+        }
+        let mut log = String::new();
+        let justify = b"r|r|r|r|r|r";
+        print_tabular_vbox(&mut log, &rows, 0, justify, true, false);
+        let answer = "┌───────────────┐\n\
+                      │        WOOFITY│\n\
+                      ├──────┬────────┤\n\
+                      │gerbil│   hippo│\n\
+                      ├─┬─┬──┼──┬───┬─┤\n\
+                      │A│B│ C│ D│  E│F│\n\
+                      ├─┼─┼──┼──┼───┼─┤\n\
+                      │5│0│13│18│102│5│\n\
+                      └─┴─┴──┴──┴───┴─┘\n";
+        if log != answer {
+            println!("\ntest 9 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+        */
     }
 }
