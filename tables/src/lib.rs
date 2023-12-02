@@ -108,6 +108,9 @@ pub fn print_tabular(
 // ignoring some ASCII escape sequences.
 
 pub fn visible_width(s: &str) -> usize {
+    if s == "\\ext" || s == "\\hline" {
+        return 0;
+    }
     let mut n = 0;
     let mut escaped = false;
     for c in s.chars() {
