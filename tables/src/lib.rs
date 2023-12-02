@@ -261,6 +261,77 @@ pub fn print_tabular_vbox(
         print!("{log}");
     }
 
+    // Define a linear programming problem, which when solved yields adjusted widths for each
+    // column, with the property that ext entries are properly accommodated.  The constraints are
+    // given by sums of variables, defined by entry,ext,...,ext (maximal) being at least equal
+    // to a number, which is the sum of actual widths for those columns, minus separation.
+
+    let mut lhs = Vec::<Vec<bool>>::new();
+    let mut rhs = Vec::<usize>::new();
+    for i in 0..rrr.len() {
+        let mut j = 0;
+        while j < ncols {
+            if rrr[i][j] == "\\hline" {
+                j += 1;
+                continue;
+            }
+            let mut con = vec![false; ncols];
+            con[j] = true;
+            let mut k = j + 1;
+            con[j] = true;
+            while k < ncols {
+                if rrr[i][k] != "\\ext" {
+                    break;
+                }
+                con[k] = true;
+                k += 1;
+            }
+            lhs.push(con);
+            let mut r = 0 as isize;
+            for l in j..k {
+                r += visible_width(&rrr[i][l]) as isize;
+                if l < k - 1 {
+                    r -= sep as isize;
+                    if vert[l] {
+                        r -= sep as isize + 1;
+                    }
+                }
+            }
+            let r = max(r, 0) as usize;
+            rhs.push(r);
+            j = k;
+        }
+    }
+    if debug_print {
+        println!("\nlinear constraints");
+        let mut rows = Vec::<Vec<String>>::new();
+        for i in 0..lhs.len() {
+            let mut row = Vec::<String>::new();
+            for j in 0..ncols {
+                row.push((if lhs[i][j] { "x" } else { " " }).to_string());
+            }
+            rows.push(row);
+        }
+        let mut log = String::new();
+        let mut justify = Vec::<u8>::new();
+        for i in 0..ncols {
+            if i > 0 {
+                justify.push(b'|');
+            }
+            justify.push(b'r');
+        }
+        print_tabular_vbox(&mut log, &rows, 0, &justify, false, false);
+        let mut log2 = String::new();
+        for (z, line) in log.lines().enumerate() {
+            if z >= 1 && z <= lhs.len() {
+                log2 += &mut format!("{line} ≥ {}\n", rhs[z - 1]);
+            } else {
+                log2 += &mut format!("{line}\n");
+            }
+        }
+        print!("{log2}");
+    }
+
     // Add space according to ext entries.
 
     for i in 0..rrr.len() {
