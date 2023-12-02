@@ -714,7 +714,9 @@ pub fn print_tabular_vbox(
             } else if j > 0
                 && i + 1 < mat.len()
                 && mat[i][j] == vec![tee]
-                && (i + 1 >= mat.len() || j >= mat[i + 1].len() || !mat[i + 1][j].ends_with(&[verty]))
+                && (i + 1 >= mat.len()
+                    || j >= mat[i + 1].len()
+                    || !mat[i + 1][j].ends_with(&[verty]))
             {
                 if verbose {
                     println!("i = {i}, j = {j}, from {} to {dash}", mat[i][j][0]);
