@@ -382,8 +382,6 @@ pub fn print_tabular_vbox(
         print!("{log2}");
     }
 
-    /*
-
     // Add space according to ext entries.
 
     for i in 0..rrr.len() {
@@ -391,19 +389,39 @@ pub fn print_tabular_vbox(
             if rrr[i][j] == "\\ext" || rrr[i][j] == "\\hline" {
                 continue;
             }
+            /*
             if j < ncols - 1 && rrr[i][j + 1] == "\\ext" {
                 continue;
             }
+            */
             let w = visible_width(&rrr[i][j]);
-            if xw[j] > w {
-                let add = xw[j] - w;
-                if just[j] == b'l' {
-                    println!("({}, {}) adding {add} on right", i + 1, j + 1);
+            let mut target = xw[j];
+            let mut k = j + 1;
+            let mut exting = false;
+            while k < ncols && rrr[i][k] == "\\ext" {
+                exting = true;
+                target += xw[k];
+                target += sep;
+                if vert[k - 1] {
+                    target += sep + 1;
+                }
+                k += 1;
+            }
+            if target > w {
+                let add = target - w;
+                // Use left justification in the exting case, for backward compatibility,
+                // and maybe because it usually makes a nicer table.  But not consistent with doc.
+                if just[j] == b'l' || exting {
+                    if debug_print {
+                        println!("({}, {}) adding {add} on right", i + 1, j + 1);
+                    }
                     for _ in 0..add {
                         rrr[i][j].push(' ');
                     }
                 } else {
-                    println!("({}, {}) adding {add} on left", i + 1, j + 1);
+                    if debug_print {
+                        println!("({}, {}) adding {add} on left", i + 1, j + 1);
+                    }
                     for _ in 0..add {
                         rrr[i][j] = " ".to_string() + &mut rrr[i][j].clone();
                     }
@@ -427,8 +445,7 @@ pub fn print_tabular_vbox(
         }
     }
 
-    */
-
+    /*
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
             // Test if matrix entry is not \\ext and the following entry is also not.
@@ -519,6 +536,7 @@ pub fn print_tabular_vbox(
             }
         }
     }
+    */
 
     // Create top boundary of table.
 
@@ -729,8 +747,8 @@ pub fn print_tabular_vbox(
                 && j < mat[i + 1].len()
                 && mat[i + 1][j].ends_with(&[verty])
                 && i > 0
-                && !mat[i - 1][j].ends_with(&[verty])
-                && mat[i - 1][j] != vec![tee]
+                && (j >= mat[i - 1].len() || !mat[i - 1][j].ends_with(&[verty]))
+                && (j >= mat[i - 1].len() || mat[i - 1][j] != vec![tee])
             {
                 if verbose {
                     println!(
@@ -801,7 +819,7 @@ pub fn print_tabular_vbox(
             } else if j > 0
                 && i + 1 < mat.len()
                 && mat[i][j] == vec![tee]
-                && !mat[i + 1][j].ends_with(&[verty])
+                && (i + 1 >= mat.len() || j >= mat[i + 1].len() || !mat[i + 1][j].ends_with(&[verty]))
             {
                 if verbose {
                     println!("i = {i}, j = {j}, from {} to {dash}", mat[i][j][0]);
@@ -873,9 +891,9 @@ mod tests {
         print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
         let answer = "┌────────┬─────────────────────────┐\n\
                       │ omega  │  superduperfineexcellent│\n\
-                      │  woof  │  snarl      octopus     │\n\
-                      │     a  │  b          c           │\n\
-                      │hiccup  │  tomatillo  ddd         │\n\
+                      │  woof  │  snarl           octopus│\n\
+                      │     a  │  b               c      │\n\
+                      │hiccup  │  tomatillo       ddd    │\n\
                       └────────┴─────────────────────────┘\n";
         if log != answer {
             println!("\ntest 1 failed");
@@ -986,9 +1004,9 @@ mod tests {
         print_tabular_vbox(&mut log, &rows, 0, &b"l|l|l|l|l|l".to_vec(), false, false);
         let answer = "┌──────┬──────┬────┬─┐\n\
                       │piglet│kitten│woof[0m│p│\n\
-                      ├─┬────┼─┬────┼────┼─┤\n\
-                      │x│x   │x│x   │x   │x│\n\
-                      └─┴────┴─┴────┴────┴─┘\n";
+                      ├────┬─┼────┬─┼────┼─┤\n\
+                      │x   │x│x   │x│x   │x│\n\
+                      └────┴─┴────┴─┴────┴─┘\n";
         if log != answer {
             println!("\ntest 5 failed");
             println!("\nyour answer:\n{}", log);
@@ -1181,7 +1199,6 @@ mod tests {
 
         // test 9
 
-        /*
         println!("running test 9");
         let rows0 = vec![
             vec!["WOOFITY", "\\ext", "\\ext", "\\ext", "\\ext", "\\ext"],
@@ -1202,11 +1219,11 @@ mod tests {
         }
         let mut log = String::new();
         let justify = b"r|r|r|r|r|r";
-        print_tabular_vbox(&mut log, &rows, 0, justify, true, false);
+        print_tabular_vbox(&mut log, &rows, 0, justify, false, false);
         let answer = "┌───────────────┐\n\
-                      │        WOOFITY│\n\
+                      │WOOFITY        │\n\
                       ├──────┬────────┤\n\
-                      │gerbil│   hippo│\n\
+                      │gerbil│hippo   │\n\
                       ├─┬─┬──┼──┬───┬─┤\n\
                       │A│B│ C│ D│  E│F│\n\
                       ├─┼─┼──┼──┼───┼─┤\n\
@@ -1220,6 +1237,5 @@ mod tests {
         if log != answer {
             panic!();
         }
-        */
     }
 }
