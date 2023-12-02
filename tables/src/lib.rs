@@ -222,7 +222,6 @@ pub fn print_tabular_vbox(
         assert_eq!(just.len(), ncols);
     }
     let mut maxcol = vec![0; ncols];
-    let mut ext = vec![0; ncols];
     for i in 0..rrr.len() {
         for j in 0..rrr[i].len() {
             if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" {
@@ -389,11 +388,6 @@ pub fn print_tabular_vbox(
             if rrr[i][j] == "\\ext" || rrr[i][j] == "\\hline" {
                 continue;
             }
-            /*
-            if j < ncols - 1 && rrr[i][j + 1] == "\\ext" {
-                continue;
-            }
-            */
             let w = visible_width(&rrr[i][j]);
             let mut target = xw[j];
             let mut k = j + 1;
@@ -445,99 +439,6 @@ pub fn print_tabular_vbox(
         }
     }
 
-    /*
-    for i in 0..rrr.len() {
-        for j in 0..rrr[i].len() {
-            // Test if matrix entry is not \\ext and the following entry is also not.
-
-            if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" && rrr[i][j] != *"\\ext" {
-                // Find the largest block j..k that does not include an ext column.
-
-                let mut k = j + 1;
-                while k < rrr[i].len() {
-                    if rrr[i][k] != *"\\ext" {
-                        break;
-                    }
-                    k += 1;
-                }
-
-                // Figure out how much space to add.  Defined *need* to be the width of the jth
-                // entry in column i.  Define *have* to be the sum across l in j..k of the
-                // maximum of column width entries, with addition for separation.
-
-                let need = visible_width(&rrr[i][j]);
-                // let need = orig_vis_widths[i][j];
-                let mut have = 0;
-                for l in j..k {
-                    have += maxcol[l];
-                    if l < k - 1 {
-                        have += sep;
-                        if vert[l] {
-                            have += sep + 1;
-                        }
-                    }
-                }
-                if debug_print {
-                    println!(
-                        "\nrow {i} columns {j}-{k} = {}",
-                        rrr[i][j..k].iter().format(",")
-                    );
-                    println!("row {i} columns {j}-{k}, have = {have}, need = {need}");
-                }
-
-                // If have exceeds need, add have - need spaces to the right of the (i,j)th entry.
-
-                if have > need {
-                    if debug_print {
-                        println!("adding {} spaces to right of row {i} col {j}", have - need,);
-                    }
-                    for _ in need..have {
-                        rrr[i][j].push(' ');
-                    }
-
-                // If instead need exceeds have, add to ext[k-1].  This is used later.
-                } else if need > have {
-                    maxcol[k - 1] += need - have;
-                    if debug_print {
-                        println!("increasing maxcol[{}] to {}", k - 1, maxcol[k - 1]);
-                    }
-                    ext[k - 1] += need - have;
-                }
-
-                // Look at the widths of column j entries and see if that means we need more space.
-
-                let mut m = 0;
-                for u in 0..rrr.len() {
-                    if j >= rrr[u].len() {
-                        eprintln!("\nProblem with line {}, not enough fields.\n", u);
-                    }
-                    if rrr[u][j] != *"\\ext" && rrr[u][j] != *"\\hline" {
-                        m = max(m, visible_width(&rrr[u][j]));
-                        // m = max(m, orig_vis_widths[u][j]);
-                    }
-                }
-                if m > visible_width(&rrr[i][j]) {
-                    // if m > orig_vis_widths[i][j] {
-                    if debug_print {
-                        eprintln!(
-                            "adding {} spaces to right of row {i} column {j} because \
-                            visible width = {}",
-                            m - visible_width(&rrr[i][j]),
-                            // m - orig_vis_widths[i][j],
-                            visible_width(&rrr[i][j]),
-                            // orig_vis_widths[i][j],
-                        );
-                    }
-                    for _ in visible_width(&rrr[i][j])..m {
-                        // for _ in orig_vis_widths[i][j]..m {
-                        rrr[i][j].push(' ');
-                    }
-                }
-            }
-        }
-    }
-    */
-
     // Create top boundary of table.
 
     log.push(topleft);
@@ -585,7 +486,7 @@ pub fn print_tabular_vbox(
                 let mut xlen = 0;
                 if r != *"\\ext" {
                     if just[j] == b'r' {
-                        for _ in rlen..(maxcol[j] - ext[j]) {
+                        for _ in rlen..maxcol[j] {
                             x.push(' ');
                             xlen += 1;
                         }
@@ -593,12 +494,6 @@ pub fn print_tabular_vbox(
                     if j < rrr[i].len() {
                         x += &r;
                         xlen += visible_width(&r);
-                    }
-                    if just[j] == b'r' {
-                        for _ in (maxcol[j] - ext[j])..maxcol[j] {
-                            x.push(' ');
-                            xlen += 1;
-                        }
                     }
                     if just[j] == b'l' {
                         for _ in xlen..maxcol[j] {
