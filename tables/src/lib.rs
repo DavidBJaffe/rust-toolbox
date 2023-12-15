@@ -5,7 +5,7 @@
 use io_utils::eprintme;
 use itertools::Itertools;
 use std::cmp::{max, min};
-use string_utils::strme;
+use string_utils::*;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
@@ -436,6 +436,17 @@ pub fn print_tabular_vbox(
                 continue;
             }
             maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
+        }
+    }
+    if debug_print {
+        println!("now maxcol = {}", maxcol.iter().format(","));
+    }
+
+    // Replace leading ext.
+
+    for j in 0..rrr.len() {
+        if rrr[j][0] == "\\ext" {
+            rrr[j][0] = stringme(&vec![b' '; maxcol[0]]);
         }
     }
 
@@ -1128,6 +1139,39 @@ mod tests {
                       └─┴─┴──┴──┴───┴─┘\n";
         if log != answer {
             println!("\ntest 9 failed");
+            println!("\nyour answer:\n{}", log);
+            println!("correct answer:\n{}", answer);
+        }
+        if log != answer {
+            panic!();
+        }
+
+        // test 10
+
+        println!("running test 10");
+        let rows0 = vec![
+            vec!["\\ext", "HELLO", "\\ext", "\\ext"],
+            vec!["\\hline"; 4],
+            vec!["bloop", "meep", "toes", "dust"],
+        ];
+        let mut rows = Vec::<Vec<String>>::new();
+        for x in rows0.iter() {
+            let mut r = Vec::<String>::new();
+            for i in 0..x.len() {
+                r.push(x[i].to_string());
+            }
+            rows.push(r);
+        }
+        let mut log = String::new();
+        let justify = b"l|l|l|l";
+        print_tabular_vbox(&mut log, &rows, 0, justify, false, false);
+        let answer = "┌─────┬──────────────┐\n\
+                      │     │HELLO         │\n\
+                      ├─────┼────┬────┬────┤\n\
+                      │bloop│meep│toes│dust│\n\
+                      └─────┴────┴────┴────┘\n";
+        if log != answer {
+            println!("\ntest 10 failed");
             println!("\nyour answer:\n{}", log);
             println!("correct answer:\n{}", answer);
         }
