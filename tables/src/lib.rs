@@ -313,6 +313,20 @@ pub fn print_tabular_vbox(
     for i in 0..rhs.len() {
         deficit += rhs[i];
     }
+
+    let mut sum = vec![vec![0; lhs.len()]; ncols];
+    for i in 0..ncols {
+        let mut xw_new = xw.clone();
+        xw_new[i] += 1;
+        for j in 0..lhs.len() {
+            for k in 0..ncols {
+                if lhs[j][k] {
+                    sum[i][j] += xw_new[k];
+                }
+            }
+        }
+    }
+
     loop {
         let mut best_improvement = 0;
         let mut best_i = 0;
@@ -321,12 +335,7 @@ pub fn print_tabular_vbox(
             xw_new[i] += 1;
             let mut current_deficit = 0;
             for j in 0..lhs.len() {
-                let mut sum = 0;
-                for k in 0..ncols {
-                    if lhs[j][k] {
-                        sum += xw_new[k];
-                    }
-                }
+                let sum = sum[i][j];
                 if sum < rhs[j] {
                     current_deficit += rhs[j] - sum;
                 }
@@ -340,11 +349,19 @@ pub fn print_tabular_vbox(
             }
         }
         xw[best_i] += 1;
+        for i in 0..ncols {
+            for j in 0..lhs.len() {
+                if lhs[j][best_i] {
+                    sum[i][j] += 1;
+                }
+            }
+        }
         deficit -= best_improvement;
         if deficit == 0 {
             break;
         }
     }
+
     if debug_print {
         println!("\nlinear constraints and solution");
         let mut rows = Vec::<Vec<String>>::new();
