@@ -1328,6 +1328,9 @@ pub fn annotate_seq_core(
                         if refdata.is_u(ts[k].0) {
                             continue;
                         }
+                        if refdata.name[ts[k].0] == "IGLC3" && m2 == m1 + 1 {
+                            continue;
+                        }
                         if refdata.rheaders_orig[ts[k].0].contains("3'UTR") {
                             continue;
                         }
