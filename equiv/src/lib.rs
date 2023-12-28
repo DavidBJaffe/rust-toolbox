@@ -54,6 +54,14 @@ impl EquivRel {
         }
     }
 
+    pub fn clone(&self) -> EquivRel {
+        EquivRel {
+            x: self.x.clone(),
+            y: self.y.clone(),
+            z: self.z.clone(),
+        }
+    }
+
     pub fn from_raw(xx: Vec<i32>, yy: Vec<i32>, zz: Vec<i32>) -> EquivRel {
         EquivRel {
             x: xx,
