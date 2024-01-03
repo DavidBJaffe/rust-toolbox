@@ -119,6 +119,8 @@ pub fn visible_width(s: &str) -> usize {
             escaped = true;
         } else if escaped && c == 'm' {
             escaped = false;
+        } else if c == '✅' {
+            n += 2;
         } else {
             n += 1;
         }
