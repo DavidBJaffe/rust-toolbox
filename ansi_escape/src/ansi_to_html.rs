@@ -419,7 +419,7 @@ fn pack_ansi_escape(y: &[u8]) -> Vec<u8> {
 
 // Convert an rgb code to a seven-character html string.
 
-fn rgb_to_html(rgb: &(u8, u8, u8)) -> String {
+pub fn rgb_to_html(rgb: &(u8, u8, u8)) -> String {
     format!("#{:02x}{:02x}{:02x}", rgb.0, rgb.1, rgb.2)
 }
 
