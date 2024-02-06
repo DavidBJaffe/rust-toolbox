@@ -533,7 +533,7 @@ pub fn reverse_sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
     s2.reverse();
 }
 
-pub fn reverse_sort_sync_by3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
+pub fn reverse_sort_sync_by3<T: PartialOrd + Clone, S1: PartialOrd + Clone, S2: PartialOrd + Clone>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
     s2: &mut Vec<S2>,
