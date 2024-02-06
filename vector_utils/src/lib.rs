@@ -508,6 +508,15 @@ pub fn reverse_sort_sync2<T: Ord + Clone, S1: Ord + Clone>(t: &mut Vec<T>, s1: &
     s1.reverse();
 }
 
+pub fn reverse_sort_sync_by2<T: PartialOrd + Clone, S1: PartialOrd + Clone>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+) {
+    let permutation = permutation::sort_by(&t[..], |a, b| b.partial_cmp(a).unwrap());
+    *t = permutation.apply_slice(&t[..]);
+    *s1 = permutation.apply_slice(&s1[..]);
+}
+
 pub fn sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
@@ -533,7 +542,11 @@ pub fn reverse_sort_sync3<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone>(
     s2.reverse();
 }
 
-pub fn reverse_sort_sync_by3<T: PartialOrd + Clone, S1: PartialOrd + Clone, S2: PartialOrd + Clone>(
+pub fn reverse_sort_sync_by3<
+    T: PartialOrd + Clone,
+    S1: PartialOrd + Clone,
+    S2: PartialOrd + Clone,
+>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
     s2: &mut Vec<S2>,
