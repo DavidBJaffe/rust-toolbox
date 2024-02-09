@@ -32,9 +32,9 @@ use std::mem::swap;
 // - time to find the class id of an element = O(1).
 
 pub struct EquivRel {
-    x: Vec<i32>, // next element in orbit
-    y: Vec<i32>, // orbit class id
-    z: Vec<i32>, // orbit size
+    pub x: Vec<i32>, // next element in orbit
+    pub y: Vec<i32>, // orbit class id
+    pub z: Vec<i32>, // orbit size
 }
 
 impl EquivRel {
