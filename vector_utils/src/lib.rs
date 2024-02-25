@@ -258,6 +258,13 @@ pub fn bin_position1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i32 {
     }
 }
 
+pub fn bin_position12_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: (&S, &T)) -> i32 {
+    match x.binary_search_by_key(&d, |&(ref a, ref b, ref _c)| (a, b)) {
+        Ok(p) => p as i32,
+        Err(_e) => -1,
+    }
+}
+
 pub fn bin_position1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i32 {
     match x.binary_search_by_key(&d, |&(ref a, ref _b, ref _c, ref _d)| a) {
         Ok(p) => p as i32,
