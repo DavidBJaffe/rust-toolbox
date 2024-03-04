@@ -90,7 +90,10 @@ where
 {
     let n = x.len();
     binary_write_from_ref::<usize>(f, &n, 1)?;
-    binary_write_from_ref::<T>(f, &x[0], x.len())
+    if n > 0 {
+        return binary_write_from_ref::<T>(f, &x[0], x.len());
+    }
+    Ok(())
 }
 
 pub fn binary_read_vec<T>(f: &mut std::fs::File, x: &mut Vec<T>) -> Result<(), Error>
