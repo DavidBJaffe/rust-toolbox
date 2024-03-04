@@ -119,7 +119,10 @@ where
 
     // Read the vector entries.
 
-    binary_read_to_ref::<T>(f, &mut x[len], n)
+    if n > 0 {
+        return binary_read_to_ref::<T>(f, &mut x[len], n);
+    }
+    Ok(())
 }
 
 pub fn binary_write_vec_vec<T>(f: &mut std::fs::File, x: &[Vec<T>]) -> Result<(), Error>
