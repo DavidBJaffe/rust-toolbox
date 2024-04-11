@@ -3152,7 +3152,11 @@ pub fn cdr3_motif_left() -> Vec<Vec<u8>> {
     ]
 }
 pub fn cdr3_motif_right() -> Vec<Vec<u8>> {
-    vec![b"LTFG.GTRVTV".to_vec(), b"LIWG.GSKLSI".to_vec()]
+    vec![
+        b"LTFG.GTRVTV".to_vec(),
+        b"LIWG.GSKLSI".to_vec(),
+        b"APFG.GTKVEI".to_vec(),
+    ]
 }
 
 pub fn cdr3_min_len() -> usize {
