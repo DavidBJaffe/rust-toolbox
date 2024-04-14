@@ -3297,7 +3297,7 @@ pub fn cdr3_loc<'a>(
 ) -> DnaStringSlice<'a> {
     // Given the design of this function, the following bound appears to be optimal
     // except possibly for changes less than ten.
-    const LOW_RELV_CDR3: isize = -40;
+    const LOW_RELV_CDR3: isize = -50;
     if ann.is_empty() {
         return tig.slice(0, 0);
     }
