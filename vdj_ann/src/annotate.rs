@@ -3128,7 +3128,7 @@ pub fn print_annotations(
 // Given a DNA sequence, return a CDR3 sequence in it (if found), its start
 // position on the DNA sequence, and left and right scores (see below).  The CDR3
 // sequence is an amino acid sequence having length at least 5, starting with
-// a C, and not containing a stop codon.
+// a C (NOT DOING THIS ANYMORE), and not containing a stop codon.
 //
 // NOTE THAT THE RIGHT MOTIF OVERLAPS THE CDR3 BY THREE AMINO ACIDS!
 //
@@ -3164,7 +3164,10 @@ pub fn cdr3_min_len() -> usize {
 }
 
 pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usize)>) {
-    const MIN_TOTAL_CDR3_SCORE: usize = 10; // about as high as one can go
+    const CANONICAL_CYSTEINE_SCORE: usize = 2;
+    const MIN_LEFT_CDR3_SCORE: usize = 5;
+    const MIN_RIGHT_CDR3_SCORE: usize = 4;
+    const MIN_TOTAL_CDR3_SCORE: usize = 12; // about as high as one can go
     let (left, right) = (cdr3_motif_left(), cdr3_motif_right());
     cdr3.clear();
     let x = tig.to_owned().to_ascii_vec();
@@ -3175,7 +3178,8 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
             return;
         }
         for j in 0..a.len() - min(a.len(), (cdr3_min_len() + 3) + 1) {
-            if a[j] == b'C' {
+            // if a[j] == b'C' {
+            if true {
                 // CDR3 starts at position j on a
                 let first_f = j + (cdr3_min_len() - 3);
                 let last_f = a.len() - 4;
@@ -3195,7 +3199,7 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
                             rscore += 1;
                         }
                     }
-                    if rscore >= 4 {
+                    if rscore >= MIN_RIGHT_CDR3_SCORE {
                         let mut st = false;
                         for l in j + 1..k + 2 {
                             if a[l] == b'*' {
@@ -3205,6 +3209,9 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
                         let ll = left[0].len();
                         if !st && j >= ll {
                             let mut lscore = 0;
+                            if a[j] == b'C' {
+                                lscore = CANONICAL_CYSTEINE_SCORE;
+                            }
                             for m in 0..ll {
                                 let mut hit = false;
                                 for r in 0..left.len() {
@@ -3218,7 +3225,9 @@ pub fn get_cdr3(tig: &DnaStringSlice, cdr3: &mut Vec<(usize, Vec<u8>, usize, usi
                             }
                             // ◼ It's possible that the lscore + rscore
                             // ◼ bound should be increased.
-                            if lscore >= 3 && lscore + rscore >= MIN_TOTAL_CDR3_SCORE {
+                            if lscore >= MIN_LEFT_CDR3_SCORE
+                                && lscore + rscore >= MIN_TOTAL_CDR3_SCORE
+                            {
                                 cdr3.push((
                                     tig.start + i + 3 * j,
                                     a[j..k + 2 + 1].to_vec(),
