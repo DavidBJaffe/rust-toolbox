@@ -308,6 +308,14 @@ pub fn upper_bound1_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: &S) -> i64 {
     x.upper_bound_by_key(&d, |(a, _b, _c)| a) as i64
 }
 
+pub fn lower_bound1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i64 {
+    x.lower_bound_by_key(&d, |(a, _b, _c, _d)| a) as i64
+}
+
+pub fn upper_bound1_4<S: Ord, T: Ord, U: Ord, V: Ord>(x: &[(S, T, U, V)], d: &S) -> i64 {
+    x.upper_bound_by_key(&d, |(a, _b, _c, _d)| a) as i64
+}
+
 pub fn lower_bound2_3<S: Ord, T: Ord, U: Ord>(x: &[(S, T, U)], d: (&S, &T)) -> i64 {
     x.lower_bound_by_key(&d, |(a, b, _c)| (a, b)) as i64
 }
