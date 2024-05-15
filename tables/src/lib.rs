@@ -2,7 +2,7 @@
 
 // Functions print_tabular and print_tabular_vbox for making pretty tables.  And related utilities.
 
-use io_utils::eprintme;
+use io_utils::{eprintme, fail};
 use itertools::Itertools;
 use std::cmp::{max, min};
 use string_utils::*;
@@ -193,7 +193,9 @@ pub fn print_tabular_vbox(
     let mut count = 0_isize;
     for i in 0..justify.len() {
         if justify[i] == b'|' {
-            assert!(count > 0);
+            if count == 0 {
+                fail!("print_tabular_vbox: justify may not start with |");
+            }
             if count >= ncols as isize {
                 eprintln!("\nposition of | in justify string is illegal");
                 eprintme!(count, ncols);
