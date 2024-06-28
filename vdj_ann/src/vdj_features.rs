@@ -646,7 +646,7 @@ pub fn fwr2(aa: &[u8], chain_type: &str, verbose: bool) -> Option<Vec<u8>> {
     fr2?;
     let cdr2 = cdr2_start(aa, chain_type, verbose);
     cdr2?;
-    if fr2.unwrap() > cdr2.unwrap() {
+    if fr2.unwrap() > cdr2.unwrap() || cdr2.unwrap() > aa.len() {
         return None;
     }
     Some(aa[fr2.unwrap()..cdr2.unwrap()].to_vec())
