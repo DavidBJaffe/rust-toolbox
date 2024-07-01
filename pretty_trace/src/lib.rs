@@ -147,6 +147,7 @@
 
 use backtrace::Backtrace;
 use io_utils::open_for_write_new;
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use libc::SIGINT;
 
@@ -844,8 +845,10 @@ fn force_pretty_trace_fancy(
                     ),
                     None => format!("thread '{}' panicked ", thread),
                 };
+                let args: Vec<String> = std::env::args().collect();
+                let cmd = format!("{}", args.iter().format(" "));
                 eprintln!(
-                    "\nRUST PROGRAM PANIC\n\n(Full traceback.  \
+                    "\nRUST PROGRAM PANIC\n\ncommand = {cmd}\n\n(Full traceback.  \
                      Rerun with env var RUST_FULL_TRACE unset to \
                      see short traceback.)\n\n{}{}\n\n{}\n\n{}\n",
                     tm,
@@ -916,8 +919,10 @@ fn force_pretty_trace_fancy(
                 } else {
                     format!("Full traceback is at {}.", log_file_name)
                 };
+                let args: Vec<String> = std::env::args().collect();
+                let cmd = format!("{}", args.iter().format(" "));
                 format!(
-                    "RUST PROGRAM PANIC AFTER {} SECONDS\n\n(Shortened traceback.  \
+                    "RUST PROGRAM PANIC AFTER {} SECONDS\n\ncommand = {cmd}\n\n(Shortened traceback.  \
                      {})\n\n{}{}{}",
                     t.elapsed().as_secs(),
                     long_msg,
@@ -1020,9 +1025,11 @@ fn force_pretty_trace_fancy(
                 ),
                 None => format!("thread '{}' panicked at '{}'", thread, msg),
             };
+            let args: Vec<String> = std::env::args().collect();
+            let cmd = format!("{}", args.iter().format(" "));
             log_file_writer
                 .write_fmt(format_args!(
-                    "\nRUST PROGRAM PANIC\n\n(Full traceback.)\n\n{}{}\n\n{}\n{}",
+                    "\nRUST PROGRAM PANIC\n\ncommand = {cmd}(Full traceback.)\n\n{}{}\n\n{}\n{}",
                     tm,
                     &msg,
                     from_utf8(&bt).unwrap(),
