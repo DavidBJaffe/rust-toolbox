@@ -635,9 +635,9 @@ pub fn reverse_sort_sync7<
     s1: &mut Vec<S1>,
     s2: &mut Vec<S2>,
     s3: &mut Vec<S3>,
-    s4: &mut Vec<S1>,
-    s5: &mut Vec<S2>,
-    s6: &mut Vec<S3>,
+    s4: &mut Vec<S4>,
+    s5: &mut Vec<S5>,
+    s6: &mut Vec<S6>,
 ) {
     let permutation = permutation::sort(&t[..]);
     *t = permutation.apply_slice(&t[..]);
