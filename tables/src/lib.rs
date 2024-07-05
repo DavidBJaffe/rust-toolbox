@@ -163,6 +163,17 @@ pub fn print_tabular_vbox(
     debug_print: bool,
     bold_box: bool,
 ) {
+
+    // Test that rows all have same length.
+
+    for i in 1..rows.len() {
+        if rows[i].len() != rows[0].len() {
+            fail!("print_tabular_vbox: row {i} has length {} but row 0 has length {}",
+                rows[i].len(), rows[0].len(),
+            );
+        }
+    }
+
     // If you've added a test that fails and are trying to get it work, temporarily change
     // the next to the last entry in the print_tabular_vbox line for the test to true.
 
