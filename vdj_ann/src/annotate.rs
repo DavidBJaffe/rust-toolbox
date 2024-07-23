@@ -1094,7 +1094,10 @@ pub fn annotate_seq_core(
             }
         }
         let mut to_delete = vec![false; annx.len()];
-        let mut chains3 = vec![(0, 0, 0)];
+        let mut chains3 = Vec::new();
+        if annx.len() > 0 {
+            chains3.push((0, 0, 0));
+        }
         for i1 in 0..annx.len() {
             let t1 = annx[i1].2 as usize;
             let n1 = &refdata.name[t1];
