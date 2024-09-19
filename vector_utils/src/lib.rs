@@ -184,6 +184,21 @@ pub fn intersection<T: Ord + Clone>(x: &[T], y: &[T], z: &mut Vec<T>) {
     }
 }
 
+// Compute the intersection of a vector of sorted vectors.
+
+pub fn intersection_all<T: Ord + Clone>(x: &Vec<Vec<T>>) -> Vec<T> {
+    if x.is_empty() {
+        return Vec::new();
+    }
+    let mut y = x[0].clone();
+    for j in 1..x.len() {
+        let mut z = Vec::<T>::new();
+        intersection(&y, &x[j], &mut z);
+        y = z;
+    }
+    y
+}
+
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 // FREQUENCY FUNCTIONS
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -623,14 +638,14 @@ pub fn reverse_sort_sync4<T: Ord + Clone, S1: Ord + Clone, S2: Ord + Clone, S3: 
 }
 
 pub fn reverse_sort_sync7<
-    T: Ord + Clone, 
-    S1: Ord + Clone, 
-    S2: Ord + Clone, 
+    T: Ord + Clone,
+    S1: Ord + Clone,
+    S2: Ord + Clone,
     S3: Ord + Clone,
-    S4: Ord + Clone, 
-    S5: Ord + Clone, 
-    S6: Ord + Clone>
-(
+    S4: Ord + Clone,
+    S5: Ord + Clone,
+    S6: Ord + Clone,
+>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
     s2: &mut Vec<S2>,
@@ -657,15 +672,15 @@ pub fn reverse_sort_sync7<
 }
 
 pub fn reverse_sort_sync8<
-    T: Ord + Clone, 
-    S1: Ord + Clone, 
-    S2: Ord + Clone, 
+    T: Ord + Clone,
+    S1: Ord + Clone,
+    S2: Ord + Clone,
     S3: Ord + Clone,
-    S4: Ord + Clone, 
-    S5: Ord + Clone, 
-    S6: Ord + Clone, 
-    S7: Ord + Clone>
-(
+    S4: Ord + Clone,
+    S5: Ord + Clone,
+    S6: Ord + Clone,
+    S7: Ord + Clone,
+>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
     s2: &mut Vec<S2>,
