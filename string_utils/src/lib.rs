@@ -311,7 +311,8 @@ pub fn hcat(col1: &[String], col2: &[String], sep: usize) -> Vec<String> {
     let height = max(col1.len(), col2.len());
     let mut width1 = 0;
     for x in col1 {
-        width1 = max(width1, x.len() + sep);
+        let len = x.chars().count();
+        width1 = max(width1, len + sep);
     }
     for i in 0..height {
         let mut s = if i < col1.len() {
@@ -319,8 +320,10 @@ pub fn hcat(col1: &[String], col2: &[String], sep: usize) -> Vec<String> {
         } else {
             String::new()
         };
-        while s.len() < width1 {
+        let mut n = s.chars().count();
+        while n < width1 {
             s += " ";
+            n += 1;
         }
         if i < col2.len() {
             s += &col2[i];
