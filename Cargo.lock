@@ -332,7 +332,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef552e6f588e446098f6ba40d89ac146c8c7b64aade83c051ee00bb5d2bc18d"
 dependencies = [
- "uuid 1.4.1",
+ "uuid 1.11.0",
 ]
 
 [[package]]
@@ -1413,7 +1413,7 @@ dependencies = [
  "debugid 0.8.0",
  "memmap2 0.9.5",
  "stable_deref_trait",
- "uuid 1.4.1",
+ "uuid 1.11.0",
 ]
 
 [[package]]
@@ -1529,9 +1529,9 @@ checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
 
 [[package]]
 name = "uuid"
-version = "1.4.1"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79daa5ed5740825c40b389c5e50312b9c86df53fccd33f281df655642b43869d"
+checksum = "f8c5f0a0af699448548ad1a2fbf920fb4bee257eae39953ba95cb84891a0446a"
 
 [[package]]
 name = "vdj_ann"
