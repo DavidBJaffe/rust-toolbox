@@ -38,7 +38,7 @@ version = "0.1.12"
 dependencies = [
  "bio_edit",
  "debruijn",
- "itertools",
+ "itertools 0.11.0",
  "string_utils",
  "vector_utils",
 ]
@@ -99,7 +99,7 @@ dependencies = [
 name = "binary_vec_io"
 version = "0.1.12"
 dependencies = [
- "itertools",
+ "itertools 0.11.0",
 ]
 
 [[package]]
@@ -305,7 +305,7 @@ checksum = "346d29ff45270b3642817082a513e55765ef5686b68e6cc0ed595897a64439d5"
 dependencies = [
  "bit-set 0.5.3",
  "boomphf",
- "itertools",
+ "itertools 0.13.0",
  "log",
  "num-traits",
  "serde",
@@ -542,9 +542,27 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.10.3"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9a9d19fa1e79b6215ff29b9d6880b706147f16e9b1dbb1e4e5947b5b02bc5e3"
+checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
@@ -961,7 +979,7 @@ version = "0.5.23"
 dependencies = [
  "backtrace",
  "io_utils",
- "itertools",
+ "itertools 0.11.0",
  "lazy_static",
  "libc",
  "nix 0.23.2",
@@ -1001,7 +1019,7 @@ checksum = "62941722fb675d463659e49c4f3fe1fe792ff24fe5bbaa9c08cd3b98a1c354f5"
 dependencies = [
  "bytes",
  "heck",
- "itertools",
+ "itertools 0.10.5",
  "lazy_static",
  "log",
  "multimap",
@@ -1020,7 +1038,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9cc1a3263e07e0bf68e96268f37665207b49560d98739662cdfaae215c720fe"
 dependencies = [
  "anyhow",
- "itertools",
+ "itertools 0.10.5",
  "proc-macro2",
  "quote",
  "syn 1.0.86",
@@ -1422,7 +1440,7 @@ version = "0.1.5"
 dependencies = [
  "ansi_escape",
  "io_utils",
- "itertools",
+ "itertools 0.11.0",
  "string_utils",
 ]
 
@@ -1507,7 +1525,7 @@ dependencies = [
  "fasta_tools",
  "hyperbase",
  "io_utils",
- "itertools",
+ "itertools 0.11.0",
  "kmer_lookup",
  "serde",
  "serde_json",
@@ -1527,7 +1545,7 @@ dependencies = [
  "fasta_tools",
  "flate2",
  "io_utils",
- "itertools",
+ "itertools 0.11.0",
  "kmer_lookup",
  "perf_stats",
  "pretty_trace",
