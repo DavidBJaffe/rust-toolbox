@@ -22,4 +22,4 @@ repository = "https://github.com/10XGenomics/rust-toolbox"
 
 [dependencies]
 bio-types = "1"
-bit-set = "0.5"
+bit-set = "0.8"
