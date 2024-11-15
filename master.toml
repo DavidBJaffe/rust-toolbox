@@ -3,7 +3,7 @@ amino = { version = "0.1", path = "../amino" }
 ansi_escape = { version = "0.1", path = "../ansi_escape" }
 binary_vec_io = { version = "0.1", path = "../binary_vec_io" }
 bio_edit = { version = "0.1", path = "../bio_edit" }
-bio-types = "0.13"
+bio-types = "1"
 bit-set = "0.5"
 debruijn = "0.3"
 dna = { version = "0.1", path = "../dna" }
