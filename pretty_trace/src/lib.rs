@@ -150,6 +150,7 @@ use io_utils::open_for_write_new;
 use itertools::Itertools;
 use lazy_static::lazy_static;
 use libc::SIGINT;
+use std::ptr::addr_of;
 
 #[cfg(not(target_os = "windows"))]
 use nix::sys::signal::{sigaction, SaFlags, SigAction, SigHandler, SigSet, Signal};
@@ -245,7 +246,7 @@ pub fn stop_profiling() -> String {
         }
         let report = REPORT.as_ref().unwrap();
         let mut traces = Vec::<String>::new();
-        let blacklist = &BLACKLIST;
+        let blacklist = addr_of!(BLACKLIST);
         let mut n = 0;
         for (frames, count) in report.data.iter() {
             let m = &frames.frames;
@@ -317,7 +318,7 @@ pub fn stop_profiling() -> String {
                             version = d;
                         }
                     }
-                    let blacklisted = blacklist.iter().any(|b| b == cratex);
+                    let blacklisted = (*blacklist).iter().any(|b| b == cratex);
                     if !blacklisted && file.ends_with(".rs") {
                         symv.push(vec![
                             name,
