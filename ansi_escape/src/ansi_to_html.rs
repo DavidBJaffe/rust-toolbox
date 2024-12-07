@@ -132,6 +132,93 @@ pub fn convert_text_with_ansi_escapes_to_svg(
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
+// This does not translate background!
+
+pub fn convert_text_with_ansi_escapes_to_svg_simple(
+    x: &str,
+    font_family: &str,
+    font_size: usize,
+) -> String {
+    // Compute separations.  These may be font-specific; optimized for Menlo.
+
+    let vsep = (19.1 / 15.0) * font_size as f64;
+    // let hsep = 0.6 * font_size as f64;
+
+    // Proceed.
+
+    let lines0 = x.split('\n').collect::<Vec<&str>>();
+    // let height = vsep * (lines0.len() as f64 - 1.2);
+    let mut lines = Vec::<String>::new();
+    let mut max_width = 0;
+    for m in 0..lines0.len() {
+        let t = &lines0[m];
+        let mut width = 0;
+        let mut svg = String::new();
+        svg += &format!(
+            "<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
+                style=\"white-space: pre;\">",
+            0,
+            (m + 1) as f64 * vsep,
+            font_family,
+            font_size,
+        );
+        let y: Vec<char> = t.chars().collect();
+        let mut states = Vec::<ColorState>::new();
+        let mut current_state = ColorState::default();
+        let mut i = 0;
+        while i < y.len() {
+            if y[i] != '' {
+                width += 1;
+                if !states.is_empty() {
+                    let new_state = merge(&states);
+                    if new_state != current_state {
+                        if !current_state.null() && !new_state.null() {
+                            svg += "</tspan>";
+                        }
+                        svg += &new_state.svg();
+                        current_state = new_state;
+                    }
+                    states.clear();
+                }
+                if y[i] != '<' {
+                    svg.push(y[i]);
+                } else {
+                    svg += "&lt;";
+                }
+                i += 1;
+            } else {
+                let mut j = i + 1;
+                loop {
+                    if y[j] == 'm' {
+                        break;
+                    }
+                    j += 1;
+                }
+                let mut e = Vec::<u8>::new();
+                for m in i..=j {
+                    e.push(y[m] as u8);
+                }
+                states.push(ansi_escape_to_color_state(&e));
+                i = j + 1;
+            }
+        }
+        max_width = max(width, max_width);
+        if !states.is_empty() {
+            svg += &merge(&states).svg();
+        }
+        svg += "</text>";
+        lines.push(svg);
+    }
+    let mut svg = String::new();
+    for i in 0..lines.len() {
+        svg += &lines[i];
+        svg += "\n";
+    }
+    svg
+}
+
+// ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 pub fn convert_text_with_ansi_escapes_to_html(
     x: &str,
     source: &str,
