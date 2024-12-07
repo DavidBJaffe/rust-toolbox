@@ -139,7 +139,7 @@ pub fn convert_text_with_ansi_escapes_to_svg_simple(
     xpos: f64,
     ypos: f64,
     font_family: &str,
-    font_size: usize,
+    font_size: f64,
 ) -> String {
     // Compute separations.  These may be font-specific; optimized for Menlo.
 
