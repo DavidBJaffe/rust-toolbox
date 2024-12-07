@@ -136,6 +136,8 @@ pub fn convert_text_with_ansi_escapes_to_svg(
 
 pub fn convert_text_with_ansi_escapes_to_svg_simple(
     x: &str,
+    xpos: f64,
+    ypos: f64,
     font_family: &str,
     font_size: usize,
 ) -> String {
@@ -157,8 +159,8 @@ pub fn convert_text_with_ansi_escapes_to_svg_simple(
         svg += &format!(
             "<text x=\"{}\" y=\"{:.1}\" font-family=\"{}\" font-size=\"{}\" \
                 style=\"white-space: pre;\">",
-            0,
-            (m + 1) as f64 * vsep,
+            xpos,
+            ypos + (m + 1) as f64 * vsep,
             font_family,
             font_size,
         );
