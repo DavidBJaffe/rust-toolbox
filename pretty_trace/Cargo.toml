@@ -24,7 +24,7 @@ string_utils = { version = "0.1", path = "../string_utils" }
 vector_utils = { version = "0.1", path = "../vector_utils" }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
-pprof = { version = "0.12", features = ["protobuf-codec", "frame-pointer"] }
+pprof = { version = "0.14", features = ["protobuf-codec", "frame-pointer"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 pprof = { version = "0.6.2", features = ["protobuf"] }
