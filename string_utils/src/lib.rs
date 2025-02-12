@@ -205,6 +205,38 @@ pub fn abbrev_list<T: Eq + std::fmt::Display>(x: &[T]) -> String {
     s
 }
 
+// Convert a sorted list into a an abbreviated string, with ranges.
+
+pub fn abbrev_list_with_ranges(x: &[usize]) -> String {
+    let mut s = String::new();
+    let mut i = 0;
+    while i < x.len() {
+        if i > 0 {
+            s.push_str(", ");
+        }
+        let mut j = i + 1;
+        while j < x.len() {
+            if x[j] != x[j - 1] + 1 {
+                break;
+            }
+            j += 1;
+        }
+        if j - i > 1 {
+            s.push_str(&format!("{}-{}", x[i], x[j - 1]));
+            i = j;
+            continue;
+        }
+        let j = next_diff(x, i);
+        if j - i == 1 {
+            s.push_str(&format!("{}", x[i]));
+        } else {
+            s.push_str(&format!("{}^{}", x[i], j - i));
+        }
+        i = j;
+    }
+    s
+}
+
 // capitalize first letter
 
 pub fn cap1(s: &str) -> String {
