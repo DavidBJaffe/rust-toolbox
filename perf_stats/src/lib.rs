@@ -29,6 +29,13 @@ pub fn elapsed(start: &Instant) -> f64 {
     d.as_secs() as f64 + d.subsec_nanos() as f64 / 1e9
 }
 
+// Return elapsed time in nanoseconds.
+
+pub fn elapsed_nanos(start: &Instant) -> u64 {
+    let d = start.elapsed();
+    d.as_secs() * 1_000_000_000 + d.subsec_nanos() as u64
+}
+
 // Report number of threads in use.
 
 pub fn nthreads() -> i64 {
