@@ -25,6 +25,7 @@ pub trait TextUtils<'a> {
     fn force_i64(&self) -> i64;
     fn force_u16(&self) -> u16;
     fn force_u64(&self) -> u64;
+    fn force_f32(&self) -> f32;
     fn force_f64(&self) -> f64;
 
     // s.before(t): return the part of s before the first instance of t
@@ -78,6 +79,10 @@ impl<'a> TextUtils<'a> for str {
     fn force_u64(&self) -> u64 {
         self.parse::<u64>()
             .unwrap_or_else(|_| panic!("could not convert \"{}\" to u64", self))
+    }
+    fn force_f32(&self) -> f32 {
+        self.parse::<f32>()
+            .unwrap_or_else(|_| panic!("could not convert \"{}\" to f32", self))
     }
     fn force_f64(&self) -> f64 {
         self.parse::<f64>()
