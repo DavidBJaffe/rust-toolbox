@@ -465,8 +465,8 @@ fn html_tail() -> String {
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-// Unpack an ANSI escape sequence into a vector of integers.  This assumes that semicolons are
-// used as separators.
+// Unpack an ANSI escape sequence into a vector of integers.  This assumes that semicolons or
+// colons are used as separators.
 
 fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     let n = x.len();
@@ -480,7 +480,7 @@ fn unpack_ansi_escape(x: &[u8]) -> Vec<u8> {
     }
     assert_eq!(x[1], b'[');
     assert_eq!(x[n - 1], b'm');
-    let s = x[2..n - 1].split(|c| *c == b';').collect::<Vec<&[u8]>>();
+    let s = x[2..n - 1].split(|c| *c == b';' || *c == b':').collect::<Vec<&[u8]>>();
     let mut y = Vec::<u8>::new();
     for i in 0..s.len() {
         y.push(strme(s[i]).force_usize() as u8);
