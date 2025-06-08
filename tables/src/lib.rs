@@ -108,7 +108,7 @@ pub fn print_tabular(
 // ignoring some ASCII escape sequences.
 
 pub fn visible_width(s: &str) -> usize {
-    if s == "\\ext" || s == "\\hline" {
+    if s == "\\ext" || s == "\\hline" || s == "\\hline_bold" {
         return 0;
     }
     let mut n = 0;
@@ -151,6 +151,8 @@ pub fn visible_width(s: &str) -> usize {
 // use one or more of these in succession horizontally to connect two vertical lines.  Cannot
 // be combined with \ext.
 //
+// \hline_bold: like \hline but bold
+//
 // bold_box: use bold box characters
 //
 // Really only guaranteed to work for the tested cases.
@@ -180,6 +182,7 @@ pub fn print_tabular_vbox(
     // Define box characters.
 
     let dash = if !bold_box { '─' } else { '━' };
+    let dash_bold = '━';
     let verty = if !bold_box { '│' } else { '┃' };
     let topleft = if !bold_box { '┌' } else { '┏' };
     let topright = if !bold_box { '┐' } else { '┓' };
@@ -242,7 +245,7 @@ pub fn print_tabular_vbox(
             if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" {
                 continue;
             }
-            if rrr[i][j] == *"\\ext" || rrr[i][j] == *"\\hline" {
+            if rrr[i][j] == *"\\ext" || rrr[i][j].starts_with(&*"\\hline") {
                 continue;
             }
             maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
@@ -285,7 +288,7 @@ pub fn print_tabular_vbox(
     for i in 0..rrr.len() {
         let mut j = 0;
         while j < ncols {
-            if rrr[i][j] == "\\hline" {
+            if rrr[i][j].starts_with(&"\\hline") {
                 j += 1;
                 continue;
             }
@@ -417,7 +420,7 @@ pub fn print_tabular_vbox(
 
     for i in 0..rrr.len() {
         for j in 0..ncols {
-            if rrr[i][j] == "\\ext" || rrr[i][j] == "\\hline" {
+            if rrr[i][j] == "\\ext" || rrr[i][j].starts_with(&"\\hline") {
                 continue;
             }
             let w = visible_width(&rrr[i][j]);
@@ -464,7 +467,7 @@ pub fn print_tabular_vbox(
             if j < rrr[i].len() - 1 && rrr[i][j + 1] == *"\\ext" {
                 continue;
             }
-            if rrr[i][j] == *"\\ext" || rrr[i][j] == *"\\hline" {
+            if rrr[i][j] == *"\\ext" || rrr[i][j].starts_with(&*"\\hline") {
                 continue;
             }
             maxcol[j] = max(maxcol[j], visible_width(&rrr[i][j]));
@@ -519,9 +522,13 @@ pub fn print_tabular_vbox(
                 for _ in 0..maxcol[j] {
                     x.push(' ');
                 }
-            } else if rrr[i][j] == *"\\hline" {
+            } else if rrr[i][j].starts_with(&*"\\hline") {
                 for _ in 0..maxcol[j] {
-                    x.push(dash);
+                    if rrr[i][j] == *"\\hline" {
+                        x.push(dash);
+                    } else {
+                        x.push(dash_bold);
+                    }
                 }
             } else {
                 let r = rrr[i][j].clone();
@@ -563,9 +570,13 @@ pub fn print_tabular_vbox(
                 jp += 1;
             }
             if add_sep && jp < ncols - 1 {
-                if rrr[i][j] == *"\\hline" {
+                if rrr[i][j].starts_with(&*"\\hline") {
                     for _ in 0..sep {
-                        log.push(dash);
+                        if rrr[i][j] == *"\\hline" {
+                            log.push(dash);
+                        } else {
+                            log.push(dash_bold);
+                        }
                     }
                 } else {
                     for _ in 0..sep {
@@ -587,9 +598,13 @@ pub fn print_tabular_vbox(
                         println!("1 - pushing {} onto row {}, j = {}", verty, i, j);
                     }
                     log.push(verty);
-                    if rrr[i][j + 1] == *"\\hline" {
+                    if rrr[i][j + 1].starts_with(&*"\\hline") {
                         for _ in 0..sep {
-                            log.push(dash);
+                            if rrr[i][j + 1] == *"\\hline" {
+                                log.push(dash);
+                            } else {
+                                log.push(dash_bold);
+                            }
                         }
                     } else {
                         for _ in 0..sep {
