@@ -208,7 +208,9 @@ pub fn print_tabular_vbox(
     let cross_bold1 = '╂';
     let cross_bold2 = '┿';
     let lefty = if !opt.bold_box { '├' } else { '┣' };
+    let lefty_bold = '┣';
     let righty = if !opt.bold_box { '┤' } else { '┫' };
+    let righty_bold = '┫';
 
     // Proceed.
 
@@ -822,7 +824,11 @@ pub fn print_tabular_vbox(
                     );
                 }
                 if i == 0 || (!mat[i - 1][j].ends_with(&[verty]) && !mat[i - 1][j].ends_with(&[verty_bold])) {
-                    mat[i][j] = vec![dash];
+                    if mat[i - 1][j].ends_with(&[verty_bold]) {
+                        mat[i][j] = vec![dash_bold];
+                    } else {
+                        mat[i][j] = vec![dash];
+                    }
                 } else {
                     mat[i][j] = vec![uptee];
                 }
@@ -860,7 +866,11 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-                mat[i][j] = vec![lefty];
+                if !opt.bold_outer {
+                    mat[i][j] = vec![lefty];
+                } else {
+                    mat[i][j] = vec![lefty_bold];
+                }
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
                 && (mat[i][j] == vec![verty] || mat[i][j] == vec![verty_bold])
@@ -872,7 +882,11 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-                mat[i][j] = vec![righty];
+                if !opt.bold_outer {
+                    mat[i][j] = vec![righty];
+                } else {
+                    mat[i][j] = vec![righty_bold];
+                }
             } else if j > 0
                 && i + 1 < mat.len()
                 && (mat[i][j] == vec![tee] || mat[i][j] == vec![tee_bold])
