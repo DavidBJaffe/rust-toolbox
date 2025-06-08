@@ -878,7 +878,7 @@ pub fn print_tabular_vbox(
                 }
                 if !opt.bold_outer {
                     mat[i][j] = vec![lefty];
-                } else if mat[i + 1][j] == vec![dash_bold] {
+                } else if mat[i][j + 1] == vec![dash_bold] {
                     mat[i][j] = vec![lefty_bold_bold];
                 } else {
                     mat[i][j] = vec![lefty_bold1];
@@ -896,7 +896,7 @@ pub fn print_tabular_vbox(
                 }
                 if !opt.bold_outer {
                     mat[i][j] = vec![righty];
-                } else if mat[i - 1][j] == vec![dash_bold] {
+                } else if mat[i][j - 1] == vec![dash_bold] {
                     mat[i][j] = vec![righty_bold_bold];
                 } else {
                     mat[i][j] = vec![righty_bold1];
