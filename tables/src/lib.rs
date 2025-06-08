@@ -202,7 +202,8 @@ pub fn print_tabular_vbox(
     let tee = if !opt.bold_box { '┬' } else { '┳' };
     let tee_bold = '┳';
     let uptee = if !opt.bold_box { '┴' } else { '┻' };
-    let uptee_bold = '┻';
+    let uptee_bold_bold = '┻';
+    let uptee_bold2 = '┷';
     let cross = if !opt.bold_box { '┼' } else { '╋' };
     let cross_bold_bold = '╋';
     let cross_bold1 = '╂';
@@ -718,7 +719,7 @@ pub fn print_tabular_vbox(
                 }
             } else if rrr[rrr.len() - 1][i + 1] != "\\ext" {
                 if vert_bold[i] || opt.bold_outer {
-                    log.push(uptee_bold);
+                    log.push(uptee_bold_bold);
                 } else {
                     log.push(uptee);
                 }
@@ -836,10 +837,14 @@ pub fn print_tabular_vbox(
                         mat[i][j] = vec![dash];
                     }
                 } else {
-                    if !opt.bold_outer {
-                        mat[i][j] = vec![uptee];
+                    if opt.bold_outer {
+                        if mat[i - 1][j - 1].ends_with(&[verty_bold]) {
+                            mat[i][j] = vec![uptee_bold_bold];
+                        } else {
+                            mat[i][j] = vec![uptee_bold2];
+                        }
                     } else {
-                        mat[i][j] = vec![uptee_bold];
+                        mat[i][j] = vec![uptee];
                     }
                 }
             } else if j > 0
