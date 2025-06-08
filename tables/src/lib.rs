@@ -210,7 +210,8 @@ pub fn print_tabular_vbox(
     let lefty = if !opt.bold_box { '├' } else { '┣' };
     let lefty_bold = '┣';
     let righty = if !opt.bold_box { '┤' } else { '┫' };
-    let righty_bold = '┫';
+    let righty_bold_bold = '┫';
+    let righty_bold1 = '┨';
 
     // Proceed.
 
@@ -884,8 +885,10 @@ pub fn print_tabular_vbox(
                 }
                 if !opt.bold_outer {
                     mat[i][j] = vec![righty];
+                } else if mat[i - 1][j] == vec![dash_bold] {
+                    mat[i][j] = vec![righty_bold_bold];
                 } else {
-                    mat[i][j] = vec![righty_bold];
+                    mat[i][j] = vec![righty_bold1];
                 }
             } else if j > 0
                 && i + 1 < mat.len()
@@ -898,7 +901,11 @@ pub fn print_tabular_vbox(
                 if verbose {
                     println!("i = {i}, j = {j}, from {} to {dash}", mat[i][j][0]);
                 }
-                mat[i][j] = vec![dash];
+                if opt.bold_outer {
+                    mat[i][j] = vec![dash_bold];
+                } else {
+                    mat[i][j] = vec![dash];
+                }
             }
         }
     }
