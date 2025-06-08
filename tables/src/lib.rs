@@ -208,7 +208,8 @@ pub fn print_tabular_vbox(
     let cross_bold1 = '╂';
     let cross_bold2 = '┿';
     let lefty = if !opt.bold_box { '├' } else { '┣' };
-    let lefty_bold = '┣';
+    let lefty_bold_bold = '┣';
+    let lefty_bold1 = '┠';
     let righty = if !opt.bold_box { '┤' } else { '┫' };
     let righty_bold_bold = '┫';
     let righty_bold1 = '┨';
@@ -800,7 +801,7 @@ pub fn print_tabular_vbox(
                 && (mat[i + 1][j].ends_with(&[verty]) || mat[i + 1][j].ends_with(&[verty_bold]))
                 && i > 0
                 && (j >= mat[i - 1].len() || (!mat[i - 1][j].ends_with(&[verty]) && !mat[i - 1][j].ends_with(&[verty_bold])))
-                && (j >= mat[i - 1].len() || mat[i - 1][j] != vec![tee])
+                && (j >= mat[i - 1].len() || (mat[i - 1][j] != vec![tee] && mat[i - 1][j] != vec![tee_bold]))
             {
                 if verbose {
                     println!(
@@ -808,7 +809,11 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-                mat[i][j] = vec![tee];
+                if !opt.bold_outer {
+                    mat[i][j] = vec![tee];
+                } else {
+                    mat[i][j] = vec![tee_bold];
+                }
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
                 && (mat[i][j] == vec![verty] || mat[i][j] == vec![verty_bold])
@@ -839,7 +844,7 @@ pub fn print_tabular_vbox(
                 && j + 1 < mat[i].len()
                 && (mat[i][j + 1] == vec![dash] || mat[i][j + 1] == vec![dash_bold])
                 && i > 0
-                && ( (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j].ends_with(&[verty_bold])) || mat[i - 1][j] == vec![tee])
+                && ( (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j].ends_with(&[verty_bold])) || mat[i - 1][j] == vec![tee] || mat[i - 1][j] == vec![tee_bold])
             {
                 if verbose {
                     println!(
@@ -869,8 +874,10 @@ pub fn print_tabular_vbox(
                 }
                 if !opt.bold_outer {
                     mat[i][j] = vec![lefty];
+                } else if mat[i + 1][j] == vec![dash_bold] {
+                    mat[i][j] = vec![lefty_bold_bold];
                 } else {
-                    mat[i][j] = vec![lefty_bold];
+                    mat[i][j] = vec![lefty_bold1];
                 }
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
