@@ -159,7 +159,7 @@ pub fn visible_width(s: &str) -> usize {
 
 #[derive(Default)]
 pub struct VboxOptions {
-    bold_box: bool,
+    pub bold_box: bool,
 }
 
 pub fn print_tabular_vbox(
