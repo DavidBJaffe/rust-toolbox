@@ -565,7 +565,7 @@ pub fn print_tabular_vbox(
             println!("now row {} = {}", i, rrr[i].iter().format(","));
             println!("0 - pushing │ onto row {}", i);
         }
-        if i > 0 || !opt.bold_outer {
+        if !opt.bold_outer {
             log.push(verty);
         } else {
             log.push(verty_bold);
@@ -681,7 +681,7 @@ pub fn print_tabular_vbox(
         if debug_print {
             println!("2 - pushing {} onto row {}", verty, i);
         }
-        if i > 0 || !opt.bold_outer {
+        if !opt.bold_outer {
             log.push(verty);
         } else {
             log.push(verty_bold);
@@ -875,7 +875,7 @@ pub fn print_tabular_vbox(
                 mat[i][j] = vec![righty];
             } else if j > 0
                 && i + 1 < mat.len()
-                && mat[i][j] == vec![tee]
+                && (mat[i][j] == vec![tee] || mat[i][j] == vec![tee_bold])
                 && (i + 1 >= mat.len()
                     || j >= mat[i + 1].len()
                     || !mat[i + 1][j].ends_with(&[verty])
