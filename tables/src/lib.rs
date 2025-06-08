@@ -809,10 +809,10 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-                if !opt.bold_outer {
-                    mat[i][j] = vec![tee];
-                } else {
+                if opt.bold_outer && i == 0 {
                     mat[i][j] = vec![tee_bold];
+                } else {
+                    mat[i][j] = vec![tee];
                 }
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
