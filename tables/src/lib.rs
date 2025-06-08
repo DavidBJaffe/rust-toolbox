@@ -160,6 +160,7 @@ pub fn visible_width(s: &str) -> usize {
 #[derive(Default)]
 pub struct VboxOptions {
     pub bold_box: bool,
+    pub bold_outer: bool,
 }
 
 pub fn print_tabular_vbox(
@@ -191,9 +192,13 @@ pub fn print_tabular_vbox(
     let verty = if !opt.bold_box { '│' } else { '┃' };
     let verty_bold = '┃';
     let topleft = if !opt.bold_box { '┌' } else { '┏' };
+    let topleft_bold = '┏';
     let topright = if !opt.bold_box { '┐' } else { '┓' };
+    let topright_bold = '┓';
     let botleft = if !opt.bold_box { '└' } else { '┗' };
+    let botleft_bold = '┗';
     let botright = if !opt.bold_box { '┘' } else { '┛' };
+    let botright_bold = '┛';
     let tee = if !opt.bold_box { '┬' } else { '┳' };
     let tee_bold = '┳';
     let uptee = if !opt.bold_box { '┴' } else { '┻' };
@@ -507,27 +512,47 @@ pub fn print_tabular_vbox(
 
     // Create top boundary of table.
 
-    log.push(topleft);
+    if !opt.bold_outer {
+        log.push(topleft);
+    } else {
+        log.push(topleft_bold);
+    }
     for i in 0..ncols {
         let mut n = maxcol[i];
         if i < ncols - 1 {
             n += sep;
         }
         for _ in 0..n {
-            log.push(dash);
+            if !opt.bold_outer {
+                log.push(dash);
+            } else {
+                log.push(dash_bold);
+            }
         }
         if vert[i] {
             if !vert_bold[i] {
-                log.push(tee);
+                if !opt.bold_outer {
+                    log.push(tee);
+                } else {
+                    log.push(tee_bold);
+                }
             } else {
                 log.push(tee_bold);
             }
             for _ in 0..sep {
-                log.push(dash);
+                if !opt.bold_outer {
+                    log.push(dash);
+                } else {
+                    log.push(dash_bold);
+                }
             }
         }
     }
-    log.push(topright);
+    if !opt.bold_outer {
+        log.push(topright);
+    } else {
+        log.push(topright_bold);
+    }
     log.push('\n');
 
     // Go through the rows.
@@ -537,7 +562,11 @@ pub fn print_tabular_vbox(
             println!("now row {} = {}", i, rrr[i].iter().format(","));
             println!("0 - pushing │ onto row {}", i);
         }
-        log.push(verty);
+        if i > 0 || !opt.bold_outer {
+            log.push(verty);
+        } else {
+            log.push(verty_bold);
+        }
         for j in 0..min(ncols, rrr[i].len()) {
             // Pad entries according to justification.
 
@@ -649,10 +678,18 @@ pub fn print_tabular_vbox(
         if debug_print {
             println!("2 - pushing {} onto row {}", verty, i);
         }
-        log.push(verty);
+        if i > 0 || !opt.bold_outer {
+            log.push(verty);
+        } else {
+            log.push(verty_bold);
+        }
         log.push('\n');
     }
-    log.push(botleft);
+    if !opt.bold_outer {
+        log.push(botleft)
+    } else {
+        log.push(botleft_bold)
+    }
     for i in 0..ncols {
         let mut n = maxcol[i];
         if i < ncols - 1 {
@@ -690,7 +727,11 @@ pub fn print_tabular_vbox(
             }
         }
     }
-    log.push(botright);
+    if !opt.bold_outer {
+        log.push(botright)
+    } else {
+        log.push(botright_bold)
+    }
     log.push('\n');
 
     // Convert into a super-character vec of matrices.  There is one vector entry per line.
