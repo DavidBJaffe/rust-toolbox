@@ -204,6 +204,9 @@ pub fn print_tabular_vbox(
     let uptee = if !opt.bold_box { '┴' } else { '┻' };
     let uptee_bold = '┻';
     let cross = if !opt.bold_box { '┼' } else { '╋' };
+    let cross_bold_bold = '╋';
+    let cross_bold1 = '╂';
+    let cross_bold2 = '┿';
     let lefty = if !opt.bold_box { '├' } else { '┣' };
     let righty = if !opt.bold_box { '┤' } else { '┫' };
 
@@ -696,7 +699,11 @@ pub fn print_tabular_vbox(
             n += sep;
         }
         for _ in 0..n {
-            log.push(dash);
+            if !opt.bold_outer {
+                log.push(dash);
+            } else {
+                log.push(dash_bold);
+            }
         }
         if vert[i] {
             if i + 1 >= rrr[rrr.len() - 1].len() {
@@ -833,7 +840,15 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-                mat[i][j] = vec![cross];
+                let mut this_cross = cross;
+                if mat[i][j - 1] == vec![dash_bold] && mat[i - 1][j] == vec![verty_bold] {
+                    this_cross = cross_bold_bold;
+                } else if mat[i][j - 1] == vec![dash_bold] {
+                    this_cross = cross_bold2;
+                } else if mat[i - 1][j] == vec![verty_bold] {
+                    this_cross = cross_bold1;
+                }
+                mat[i][j] = vec![this_cross];
             } else if (mat[i][j] == vec![verty] || mat[i][j] == vec![verty_bold])
                 && j + 1 < mat[i].len()
                 && (mat[i][j + 1] == vec![dash] || mat[i][j + 1] == vec![dash_bold])
