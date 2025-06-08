@@ -836,7 +836,11 @@ pub fn print_tabular_vbox(
                         mat[i][j] = vec![dash];
                     }
                 } else {
-                    mat[i][j] = vec![uptee];
+                    if !opt.bold_outer {
+                        mat[i][j] = vec![uptee];
+                    } else {
+                        mat[i][j] = vec![uptee_bold];
+                    }
                 }
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
@@ -902,8 +906,8 @@ pub fn print_tabular_vbox(
                 && (mat[i][j] == vec![tee] || mat[i][j] == vec![tee_bold])
                 && (i + 1 >= mat.len()
                     || j >= mat[i + 1].len()
-                    || !mat[i + 1][j].ends_with(&[verty])
-                    || !mat[i + 1][j].ends_with(&[verty_bold]))
+                    || (!mat[i + 1][j].ends_with(&[verty])
+                    && !mat[i + 1][j].ends_with(&[verty_bold])))
             {
                 if verbose {
                     println!("i = {i}, j = {j}, from {} to {dash}", mat[i][j][0]);
