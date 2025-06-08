@@ -717,10 +717,10 @@ pub fn print_tabular_vbox(
                     log.push(dash_bold);
                 }
             } else if rrr[rrr.len() - 1][i + 1] != "\\ext" {
-                if !vert_bold[i] {
-                    log.push(uptee);
-                } else {
+                if vert_bold[i] || opt.bold_outer {
                     log.push(uptee_bold);
+                } else {
+                    log.push(uptee);
                 }
             } else {
                 if !vert_bold[i] {
