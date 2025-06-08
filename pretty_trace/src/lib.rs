@@ -186,6 +186,7 @@ use std::{
 use std::os::unix::io::FromRawFd;
 
 use string_utils::{stringme, strme, TextUtils};
+use tables::VboxOptions;
 use tables::print_tabular_vbox;
 use vector_utils::{contains_at, erase_if, make_freq};
 
@@ -332,7 +333,7 @@ pub fn stop_profiling() -> String {
             }
             if !symv.is_empty() {
                 let mut log = String::new();
-                print_tabular_vbox(&mut log, &symv, 0, b"l|l|l|l|l", false, false);
+                print_tabular_vbox(&mut log, &symv, 0, b"l|l|l|l|l", false, &VboxOptions::default());
                 for _ in 0..*count {
                     let x = log.to_string();
                     traces.push(x);

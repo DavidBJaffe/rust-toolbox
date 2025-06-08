@@ -157,13 +157,18 @@ pub fn visible_width(s: &str) -> usize {
 //
 // Really only guaranteed to work for the tested cases.
 
+#[derive(Default)]
+pub struct VboxOptions {
+    bold_box: bool,
+}
+
 pub fn print_tabular_vbox(
     log: &mut String,
     rows: &[Vec<String>],
     sep: usize,
     justify: &[u8],
     debug_print: bool,
-    bold_box: bool,
+    opt: &VboxOptions,
 ) {
 
     // Test that rows all have same length.
@@ -181,21 +186,21 @@ pub fn print_tabular_vbox(
 
     // Define box characters.
 
-    let dash = if !bold_box { '─' } else { '━' };
+    let dash = if !opt.bold_box { '─' } else { '━' };
     let dash_bold = '━';
-    let verty = if !bold_box { '│' } else { '┃' };
+    let verty = if !opt.bold_box { '│' } else { '┃' };
     let verty_bold = '┃';
-    let topleft = if !bold_box { '┌' } else { '┏' };
-    let topright = if !bold_box { '┐' } else { '┓' };
-    let botleft = if !bold_box { '└' } else { '┗' };
-    let botright = if !bold_box { '┘' } else { '┛' };
-    let tee = if !bold_box { '┬' } else { '┳' };
+    let topleft = if !opt.bold_box { '┌' } else { '┏' };
+    let topright = if !opt.bold_box { '┐' } else { '┓' };
+    let botleft = if !opt.bold_box { '└' } else { '┗' };
+    let botright = if !opt.bold_box { '┘' } else { '┛' };
+    let tee = if !opt.bold_box { '┬' } else { '┳' };
     let tee_bold = '┳';
-    let uptee = if !bold_box { '┴' } else { '┻' };
+    let uptee = if !opt.bold_box { '┴' } else { '┻' };
     let uptee_bold = '┻';
-    let cross = if !bold_box { '┼' } else { '╋' };
-    let lefty = if !bold_box { '├' } else { '┣' };
-    let righty = if !bold_box { '┤' } else { '┫' };
+    let cross = if !opt.bold_box { '┼' } else { '╋' };
+    let lefty = if !opt.bold_box { '├' } else { '┣' };
+    let righty = if !opt.bold_box { '┤' } else { '┫' };
 
     // Proceed.
 
@@ -289,7 +294,7 @@ pub fn print_tabular_vbox(
             }
             justify.push(b'r');
         }
-        print_tabular_vbox(&mut log, &vis, 0, &justify, false, false);
+        print_tabular_vbox(&mut log, &vis, 0, &justify, false, &VboxOptions::default());
         print!("{log}");
     }
 
@@ -419,7 +424,7 @@ pub fn print_tabular_vbox(
             row.push(xw[i].to_string());
         }
         rows.push(row);
-        print_tabular_vbox(&mut log, &rows, 0, &justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 0, &justify, false, &VboxOptions::default());
         let mut log2 = String::new();
         for (z, line) in log.lines().enumerate() {
             if z >= 1 && z <= lhs.len() {
