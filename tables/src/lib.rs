@@ -958,6 +958,7 @@ mod tests {
     // cargo test -p tables test_print_tabular_vbox -- --nocapture
 
     use crate::print_tabular_vbox;
+    use crate::VboxOptions;
     use ansi_escape::{emit_bold_escape, emit_end_escape};
     use string_utils::stringme;
 
@@ -989,7 +990,7 @@ mod tests {
         rows.push(row);
         let mut log = String::new();
         let justify = &[b'r', b'|', b'l', b'l'];
-        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, &VboxOptions::default());
         let answer = "┌────────┬─────────────────────────┐\n\
                       │ omega  │  superduperfineexcellent│\n\
                       │  woof  │  snarl           octopus│\n\
@@ -1017,7 +1018,7 @@ mod tests {
         rows.push(row);
         let mut log = String::new();
         let justify = &[b'l', b'|', b'l'];
-        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, &VboxOptions::default());
         let answer = "┌────────┬────────┐\n\
                       │pencil  │  pusher│\n\
                       ├────────┴────────┤\n\
@@ -1044,7 +1045,7 @@ mod tests {
         rows.push(row);
         let mut log = String::new();
         let justify = &[b'l', b'|', b'l'];
-        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, &VboxOptions::default());
         let answer = "┌─────────────────┐\n\
                       │fabulous pumpkins│\n\
                       ├────────┬────────┤\n\
@@ -1069,7 +1070,7 @@ mod tests {
         rows.push(row);
         let mut log = String::new();
         let justify = &[b'l', b'|', b'l'];
-        print_tabular_vbox(&mut log, &rows, 2, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 2, justify, false, &VboxOptions::default());
         let answer = "┌───────┬──────┐\n\
                       ├───────┼──────┤\n\
                       │hunky  │  dory│\n\
@@ -1102,7 +1103,7 @@ mod tests {
         let row = vec!["x".to_string(); 6];
         rows.push(row);
         let mut log = String::new();
-        print_tabular_vbox(&mut log, &rows, 0, &b"l|l|l|l|l|l".to_vec(), false, false);
+        print_tabular_vbox(&mut log, &rows, 0, &b"l|l|l|l|l|l".to_vec(), false, &VboxOptions::default());
         let answer = "┌──────┬──────┬────┬─┐\n\
                       │piglet│kitten│woof[0m│p│\n\
                       ├────┬─┼────┬─┼────┼─┤\n\
@@ -1161,7 +1162,7 @@ mod tests {
         for _ in 0..rows[0].len() - 1 {
             just.append(&mut b"|l".to_vec());
         }
-        print_tabular_vbox(&mut log, &rows, 0, &just, false, false);
+        print_tabular_vbox(&mut log, &rows, 0, &just, false, &VboxOptions::default());
         let answer = "┌───────────────────┬──────────────┬──────────────┬─┐\n\
                       │                   │    [01mgumbo 1[0m   │    [01mgumbo 2[0m   │ │\n\
                       ├──────┬────────┬───┼────┬─────┬───┼────┬─────┬───┼─┤\n\
@@ -1218,7 +1219,9 @@ mod tests {
         rows[4][5] = "282".to_string();
         rows[4][6] = "AGGGATGGTAAGGATGTTTTCATTTGGTGATCAGTTGGGCTGAGCTGGGTTTTCCTT".to_string();
         let mut log = String::new();
-        print_tabular_vbox(&mut log, &rows, 0, b"l|l|r|r|r|r|l", false, true);
+        let mut opt = VboxOptions::default();
+        opt.bold_box = true;
+        print_tabular_vbox(&mut log, &rows, 0, b"l|l|r|r|r|r|l", false, &opt);
         let answer =
             "┏━━━━━━┳━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n\
 ┃      ┃ read┃ edge  ┃                                                         ┃\n\
@@ -1280,7 +1283,7 @@ mod tests {
             0,
             b"l|r|r|r|r|r|r|r|r|r|r|r|r|r|r",
             false,
-            false,
+            &VboxOptions::default(),
         );
         let answer = "┌──────────┬───────┬───────┬───────┬───────┬───────┬───────┬───────┐\n\
 │mangos    │   1   │   2   │   3   │   4   │   5   │   6   │ total │\n\
@@ -1320,7 +1323,7 @@ mod tests {
         }
         let mut log = String::new();
         let justify = b"r|r|r|r|r|r";
-        print_tabular_vbox(&mut log, &rows, 0, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 0, justify, false, &VboxOptions::default());
         let answer = "┌───────────────┐\n\
                       │WOOFITY        │\n\
                       ├──────┬────────┤\n\
@@ -1357,7 +1360,7 @@ mod tests {
         }
         let mut log = String::new();
         let justify = b"l|l|l|l";
-        print_tabular_vbox(&mut log, &rows, 0, justify, false, false);
+        print_tabular_vbox(&mut log, &rows, 0, justify, false, &VboxOptions::default());
         let answer = "┌─────┬──────────────┐\n\
                       │     │HELLO         │\n\
                       ├─────┼────┬────┬────┤\n\
