@@ -201,6 +201,7 @@ pub fn print_tabular_vbox(
     let botright_bold = '┛';
     let tee = if !opt.bold_box { '┬' } else { '┳' };
     let tee_bold = '┳';
+    let tee_bold2 = '┯';
     let uptee = if !opt.bold_box { '┴' } else { '┻' };
     let uptee_bold_bold = '┻';
     let uptee_bold2 = '┷';
@@ -814,11 +815,28 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
+
+
+                /*
                 if opt.bold_outer && i == 0 {
                     mat[i][j] = vec![tee_bold];
                 } else {
                     mat[i][j] = vec![tee];
                 }
+                */
+
+                // NEW:
+                if opt.bold_outer && i == 0 {
+                    if mat[i + 1][j - 1].ends_with(&[verty_bold]) {
+                        mat[i][j] = vec![tee_bold];
+                    } else {
+                        mat[i][j] = vec![tee_bold2];
+                    }
+                } else {
+                    mat[i][j] = vec![tee];
+                }
+
+
             } else if j > 0
                 && (mat[i][j - 1] == vec![dash] || mat[i][j - 1] == vec![dash_bold])
                 && (mat[i][j] == vec![verty] || mat[i][j] == vec![verty_bold])
