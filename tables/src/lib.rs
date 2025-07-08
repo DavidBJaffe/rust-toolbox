@@ -542,8 +542,10 @@ pub fn print_tabular_vbox(
             if !vert_bold[i] {
                 if !opt.bold_outer {
                     log.push(tee);
-                } else {
+                } else if i == 0 || vert_bold[i - 1] {
                     log.push(tee_bold);
+                } else {
+                    log.push(tee_bold2);
                 }
             } else {
                 log.push(tee_bold);
@@ -817,14 +819,13 @@ pub fn print_tabular_vbox(
                 }
 
 
-                /*
                 if opt.bold_outer && i == 0 {
                     mat[i][j] = vec![tee_bold];
                 } else {
                     mat[i][j] = vec![tee];
                 }
-                */
 
+                /*
                 // NEW:
                 if opt.bold_outer && i == 0 {
                     if mat[i + 1][j - 1].ends_with(&[verty_bold]) {
@@ -835,6 +836,7 @@ pub fn print_tabular_vbox(
                 } else {
                     mat[i][j] = vec![tee];
                 }
+                */
 
 
             } else if j > 0
