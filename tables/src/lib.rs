@@ -542,7 +542,7 @@ pub fn print_tabular_vbox(
             if !vert_bold[i] {
                 if !opt.bold_outer {
                     log.push(tee);
-                } else if vert_bold[i - 1] {
+                } else if vert_bold[i] {
                     log.push(tee_bold);
                 } else {
                     log.push(tee_bold2);
