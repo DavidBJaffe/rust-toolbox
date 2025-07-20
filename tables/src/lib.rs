@@ -809,7 +809,7 @@ pub fn print_tabular_vbox(
                 && (mat[i + 1][j].ends_with(&[verty]) || mat[i + 1][j].ends_with(&[verty_bold]))
                 && i > 0
                 && (j >= mat[i - 1].len() || (!mat[i - 1][j].ends_with(&[verty]) && !mat[i - 1][j].ends_with(&[verty_bold])))
-                && (j >= mat[i - 1].len() || (mat[i - 1][j] != vec![tee] && mat[i - 1][j] != vec![tee_bold]))
+                && (j >= mat[i - 1].len() || (mat[i - 1][j] != vec![tee] && mat[i - 1][j] != vec![tee_bold] && mat[i - 1][j] != vec![tee_bold2]))
             {
                 if verbose {
                     println!(
@@ -817,7 +817,6 @@ pub fn print_tabular_vbox(
                         mat[i][j][0]
                     );
                 }
-
 
                 if opt.bold_outer && i == 0 {
                     mat[i][j] = vec![tee_bold];
@@ -877,7 +876,7 @@ pub fn print_tabular_vbox(
                 && j + 1 < mat[i].len()
                 && (mat[i][j + 1] == vec![dash] || mat[i][j + 1] == vec![dash_bold])
                 && i > 0
-                && ( (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j].ends_with(&[verty_bold])) || mat[i - 1][j] == vec![tee] || mat[i - 1][j] == vec![tee_bold])
+                && ( (mat[i - 1][j].ends_with(&[verty]) || mat[i - 1][j].ends_with(&[verty_bold])) || mat[i - 1][j] == vec![tee] || mat[i - 1][j] == vec![tee_bold] || mat[i - 1][j] == vec![tee_bold2])
             {
                 if verbose {
                     println!(
@@ -932,7 +931,7 @@ pub fn print_tabular_vbox(
                 }
             } else if j > 0
                 && i + 1 < mat.len()
-                && (mat[i][j] == vec![tee] || mat[i][j] == vec![tee_bold])
+                && (mat[i][j] == vec![tee] || mat[i][j] == vec![tee_bold] || mat[i][j] == vec![tee_bold2])
                 && (i + 1 >= mat.len()
                     || j >= mat[i + 1].len()
                     || (!mat[i + 1][j].ends_with(&[verty])
