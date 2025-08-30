@@ -610,6 +610,24 @@ pub fn sort_sync_by3<
     *s2 = permutation.apply_slice(&s2[..]);
 }
 
+pub fn sort_sync_by4<
+    T: PartialOrd + Clone,
+    S1: PartialOrd + Clone,
+    S2: PartialOrd + Clone,
+    S3: PartialOrd + Clone,
+>(
+    t: &mut Vec<T>,
+    s1: &mut Vec<S1>,
+    s2: &mut Vec<S2>,
+    s3: &mut Vec<S3>,
+) {
+    let permutation = permutation::sort_by(&t[..], |a, b| a.partial_cmp(b).unwrap());
+    *t = permutation.apply_slice(&t[..]);
+    *s1 = permutation.apply_slice(&s1[..]);
+    *s2 = permutation.apply_slice(&s2[..]);
+    *s3 = permutation.apply_slice(&s3[..]);
+}
+
 pub fn reverse_sort_sync_by2<T: PartialOrd + Clone, S1: PartialOrd + Clone>(
     t: &mut Vec<T>,
     s1: &mut Vec<S1>,
