@@ -3,6 +3,7 @@
 // Functions print_tabular and print_tabular_vbox for making pretty tables.  And related utilities.
 
 use io_utils::{eprintme, fail};
+use io_utils::FAIL_ANNOUNCE_FUNCTION;
 use itertools::Itertools;
 use std::cmp::{max, min};
 use string_utils::*;

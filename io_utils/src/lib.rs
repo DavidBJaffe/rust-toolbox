@@ -9,6 +9,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::{fmt::Debug, fs::File, io::prelude::*, path::Path};
+use std::sync::RwLock;
 use string_utils::TextUtils;
 
 // ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -18,16 +19,41 @@ use string_utils::TextUtils;
 // Macro to exit(1) after printing the given message to stderr.  The use of three eprintln!
 // instances is not quite right because if errors are encountered on multiple threads, these
 // three instances may not be executed contiguously.
+//
+// If you had called store_announce_function, then it will be run.  If store_announce_function is
+// called more than once, then the last instance applies.
+//
+// Example:
+//
+// fn announce(msg: &str) {
+//     println!("{msg}");
+// }
+// store_announce_function(announce);
+
+pub static FAIL_ANNOUNCE_FUNCTION: RwLock<Option<fn(&str)>> = RwLock::new(None);
+
+pub fn store_announce_function(func: fn(&str)) {
+    let mut stored = FAIL_ANNOUNCE_FUNCTION.write().unwrap();
+    *stored = Some(func);
+}
 
 #[macro_export]
 macro_rules! fail {
     ($u:expr) => {
+        let stored = FAIL_ANNOUNCE_FUNCTION.read().unwrap();
+        if let Some(func) = *stored {
+            func(&format!( $u ));
+        }
         eprintln!("");
         eprintln!( $u );
         eprintln!("");
         std::process::exit(1);
     };
     ($u:expr, $($x:tt)*) => {
+        let stored = FAIL_ANNOUNCE_FUNCTION.read().unwrap();
+        if let Some(func) = *stored {
+            func(&format!( $u, $($x)* ));
+        }
         eprintln!("");
         eprintln!( $u, $($x)* );
         eprintln!("");
