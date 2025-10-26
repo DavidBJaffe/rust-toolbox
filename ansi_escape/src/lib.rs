@@ -185,6 +185,14 @@ pub fn bold(s: &str) -> String {
     format!("[01m{}[0m", s)
 }
 
+pub fn bold_red(s: &str) -> String {
+    format!("[01m[31m{}[0m", s)
+}
+
+pub fn bold_green(s: &str) -> String {
+    format!("[01m[32m{}[0m", s)
+}
+
 pub fn emit_eight_bit_color_escape(log: &mut Vec<u8>, c: usize) {
     log.append(&mut b"[38;5;".to_vec());
     log.append(&mut format!("{}", c).as_bytes().to_vec());
