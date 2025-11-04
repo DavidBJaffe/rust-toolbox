@@ -6,6 +6,7 @@
 // See also crate memmap.
 
 use itertools::Itertools;
+use std::convert::TryInto;
 use std::io::Write;
 
 #[cfg(not(target_os = "windows"))]
@@ -153,4 +154,22 @@ where
         binary_read_vec::<T>(f, &mut x[i])?;
     }
     Ok(())
+}
+
+pub fn binary_read_vec_vec_from_memory(bytes: &[u8], x: &mut Vec<Vec<f64>>) -> usize {
+    let t = std::mem::size_of::<f64>();
+    let mut pos = 0;
+    let n = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
+    pos += 8;
+    x.resize(n, Vec::new());
+    for i in 0..n {
+        let k = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
+        pos += 8;
+        x[i].resize(k, 0.0);
+        for j in 0..k {
+            x[i][j] = f64::from_le_bytes(bytes[pos..pos + t].try_into().unwrap());
+            pos += t;
+        }
+    }
+    pos
 }
