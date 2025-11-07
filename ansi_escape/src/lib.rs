@@ -189,6 +189,10 @@ pub fn bold_red(s: &str) -> String {
     format!("[01m[31m{}[0m", s)
 }
 
+pub fn blue(s: &str) -> String {
+    format!("[38;5;12m{s}[0m")
+}
+
 pub fn bold_green(s: &str) -> String {
     format!("[01m[32m{}[0m", s)
 }
