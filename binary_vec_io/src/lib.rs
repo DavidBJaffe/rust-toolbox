@@ -173,3 +173,19 @@ pub fn binary_read_vec_vec_from_memory(bytes: &[u8], x: &mut Vec<Vec<f64>>) -> u
     }
     pos
 }
+
+pub fn binary_write_vec_to_memory(x: &Vec<f32>) -> Vec<u8> {
+    let mut bytes = x.len().to_le_bytes().to_vec();
+    for i in 0..x.len() {
+        bytes.append(&mut x[i].to_le_bytes().to_vec());
+    }
+    bytes
+}
+
+pub fn binary_write_vec_vec_to_memory(x: &Vec<Vec<f32>>) -> Vec<u8> {
+    let mut bytes = x.len().to_le_bytes().to_vec();
+    for i in 0..x.len() {
+        bytes.append(&mut binary_write_vec_to_memory(&x[i]));
+    }
+    bytes
+}
