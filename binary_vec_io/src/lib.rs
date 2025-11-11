@@ -156,6 +156,19 @@ where
     Ok(())
 }
 
+pub fn binary_read_vec_from_memory(bytes: &[u8], x: &mut Vec<f32>) -> usize {
+    let t = std::mem::size_of::<f32>();
+    let mut pos = 0;
+    let n = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
+    pos += 8;
+    x.resize(n, 0.0);
+    for i in 0..n {
+        x[i] = f32::from_le_bytes(bytes[pos..pos + t].try_into().unwrap());
+        pos += t;
+    }
+    pos
+}
+
 pub fn binary_read_vec_vec_from_memory(bytes: &[u8], x: &mut Vec<Vec<f64>>) -> usize {
     let t = std::mem::size_of::<f64>();
     let mut pos = 0;
