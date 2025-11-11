@@ -156,15 +156,34 @@ where
     Ok(())
 }
 
-pub fn binary_read_vec_from_memory(bytes: &[u8], x: &mut Vec<f32>) -> usize {
-    let t = std::mem::size_of::<f32>();
+
+pub trait FromLeBytes: Sized {
+    const BYTE_LEN: usize;
+    fn from_le_bytes_slice(bytes: &[u8]) -> Self;
+}
+
+impl FromLeBytes for f32 {
+    const BYTE_LEN: usize = 4;
+    fn from_le_bytes_slice(bytes: &[u8]) -> Self {
+        let arr: [u8; 4] = bytes.try_into().unwrap();
+        Self::from_le_bytes(arr)
+    }
+}
+
+pub fn binary_read_vec_from_memory<T>(bytes: &[u8], x: &mut Vec<T>) -> usize
+where
+    T: BinaryInputOutputSafe + Clone + Default + FromLeBytes,
+{
     let mut pos = 0;
     let n = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
     pos += 8;
-    x.resize(n, 0.0);
-    for i in 0..n {
-        x[i] = f32::from_le_bytes(bytes[pos..pos + t].try_into().unwrap());
-        pos += t;
+    x.clear();
+    x.reserve(n);
+    for _ in 0..n {
+        let end = pos + T::BYTE_LEN;
+        let val = T::from_le_bytes_slice(&bytes[pos..end]);
+        x.push(val);
+        pos = end;
     }
     pos
 }
