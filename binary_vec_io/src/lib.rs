@@ -170,6 +170,14 @@ impl FromLeBytes for f32 {
     }
 }
 
+impl FromLeBytes for f64 {
+    const BYTE_LEN: usize = 8;
+    fn from_le_bytes_slice(bytes: &[u8]) -> Self {
+        let arr: [u8; 8] = bytes.try_into().unwrap();
+        Self::from_le_bytes(arr)
+    }
+}
+
 pub fn binary_read_vec_from_memory<T>(bytes: &[u8], x: &mut Vec<T>) -> usize
 where
     T: BinaryInputOutputSafe + Clone + Default + FromLeBytes,
@@ -188,8 +196,10 @@ where
     pos
 }
 
-pub fn binary_read_vec_vec_from_memory(bytes: &[u8], x: &mut Vec<Vec<f64>>) -> usize {
-    let t = std::mem::size_of::<f64>();
+pub fn binary_read_vec_vec_from_memory<T>(bytes: &[u8], x: &mut Vec<Vec<T>>) -> usize
+where
+    T: BinaryInputOutputSafe + Clone + FromLeBytes + Default,
+{
     let mut pos = 0;
     let n = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
     pos += 8;
@@ -197,10 +207,13 @@ pub fn binary_read_vec_vec_from_memory(bytes: &[u8], x: &mut Vec<Vec<f64>>) -> u
     for i in 0..n {
         let k = usize::from_le_bytes(bytes[pos..pos + 8].try_into().unwrap());
         pos += 8;
-        x[i].resize(k, 0.0);
-        for j in 0..k {
-            x[i][j] = f64::from_le_bytes(bytes[pos..pos + t].try_into().unwrap());
-            pos += t;
+        x[i].clear();
+        x[i].reserve(k);
+        for _ in 0..k {
+            let end = pos + T::BYTE_LEN;
+            let val = T::from_le_bytes_slice(&bytes[pos..end]);
+            pos = end;
+            x[i].push(val);
         }
     }
     pos
