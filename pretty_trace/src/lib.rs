@@ -956,7 +956,7 @@ fn force_pretty_trace_fancy(
                         let f = File::open(&ex);
                         if f.is_err() {
                             out +=
-                            "█ WARNING.  Your executable file could not be opened for reading.\n\
+                            "█ WARNING.  Your executable file {ex} could not be opened for reading.\n\
                          █ This might be because it does not have read permission set for you.\n\
                          █ This may result in a defective traceback.\n\n";
                         }
