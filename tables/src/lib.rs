@@ -238,7 +238,19 @@ pub fn print_tabular_vbox(
                 eprintln!("\nposition of | in justify string is illegal");
                 eprintme!(count, ncols);
             }
-            assert!(count < ncols as isize);
+            if count >= ncols as isize {
+                eprintln!("\nencountered problem in justify");
+                eprintln!("justify = {}", strme(&justify));
+                let mut pos_syms = 0;
+                for j in 0..justify.len() {
+                    if justify[j] != b'|' && justify[j] != b'!' {
+                        pos_syms += 1;
+                    }
+                }
+                eprintln!("This implies that the table has {pos_syms} columns.");
+                eprintln!("But it actually has {ncols} columns.");
+                fail!("print_tabular_vbox: justify string is incompatible with table");
+            }
             vert[(count - 1) as usize] = true;
         } else if justify[i] == b'!' {
             if count == 0 {
