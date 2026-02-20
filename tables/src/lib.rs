@@ -177,6 +177,8 @@ pub fn print_tabular_vbox(
 
     for i in 1..rows.len() {
         if rows[i].len() != rows[0].len() {
+            println!("\nrow[0] = {}", rows[0].iter().format(","));
+            println!("\nrow[{i}] = {}", rows[i].iter().format(","));
             fail!("print_tabular_vbox: row {i} has length {} but row 0 has length {}",
                 rows[i].len(), rows[0].len(),
             );
